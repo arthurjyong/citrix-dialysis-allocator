@@ -1,0 +1,2776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Citrix Dialysis Allocator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="version" content="1.0.0">
+<script>
+(function () { try { var t = localStorage.getItem('dialysis-allocator-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {  } })();
+</script>
+<style>
+:root {
+  --bg: #F2F4F7; --surface: #FFFFFF; --surface-2: #F7F9FB; --line: #DCE2E8; --line-strong: #C3CCD5;
+  --fg: #1C2733; --fg-muted: #51606E; --accent: #1F4FD1; --accent-fg: #FFFFFF;
+  --hepb-bg: #FDE2E1; --hepb-fg: #9B1C1C; --contact-bg: #FEF0C7; --contact-fg: #8A3B08;
+  --iso-bg: #DDF2F6; --iso-fg: #0F5A6E; --unk-bg: #E4E9FB; --unk-fg: #2F3F8F;
+  --gen-bg: #ECEFF3; --gen-fg: #3B4856; --carried-bg: #ECE7FE; --carried-fg: #5520B0;
+  --rule-fg: #0B5E43;
+  --ok-bg: #DCFAE6; --ok-line: #15803D;
+  --warn-bg: #FEF0C7; --warn-line: #B45309; --warn-fg: #8A3B08; --warn-on: #FFFFFF;
+  --danger: #B42318; --danger-on: #FFFFFF; --danger-bg: #FEE4E2;
+  --hatch-a: #E8ECF0; --hatch-b: #DCE1E7; --manual-bg: #FFF8E6; --manual-line: #EACB86;
+  --shadow: 0 10px 28px rgba(16, 24, 40, 0.18); --scrim: rgba(16, 24, 40, 0.55);
+  --font-ui: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-code: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E141B; --surface: #161F29; --surface-2: #1B2531; --line: #2A3542; --line-strong: #3A4757;
+    --fg: #E5EAF0; --fg-muted: #A1AEBB; --accent: #7BA2FF; --accent-fg: #0B1220;
+    --hepb-bg: #4A1B1B; --hepb-fg: #FFB3AE; --contact-bg: #45300E; --contact-fg: #FFD387;
+    --iso-bg: #0E3942; --iso-fg: #8EE1F0; --unk-bg: #232B4A; --unk-fg: #B9C6FF;
+    --gen-bg: #26313D; --gen-fg: #C3CDD7; --carried-bg: #2D2250; --carried-fg: #CBB8FF;
+    --rule-fg: #8FE0C0;
+    --ok-bg: #11351F; --ok-line: #43C072;
+    --warn-bg: #45300E; --warn-line: #E39A2D; --warn-fg: #FFD387; --warn-on: #1A1206;
+    --danger: #F2665E; --danger-on: #1A0B0A; --danger-bg: #461414;
+    --hatch-a: #1E2833; --hatch-b: #26313D; --manual-bg: #2E2410; --manual-line: #6B5420;
+    --shadow: 0 10px 28px rgba(0, 0, 0, 0.5); --scrim: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E141B; --surface: #161F29; --surface-2: #1B2531; --line: #2A3542; --line-strong: #3A4757;
+  --fg: #E5EAF0; --fg-muted: #A1AEBB; --accent: #7BA2FF; --accent-fg: #0B1220;
+  --hepb-bg: #4A1B1B; --hepb-fg: #FFB3AE; --contact-bg: #45300E; --contact-fg: #FFD387;
+  --iso-bg: #0E3942; --iso-fg: #8EE1F0; --unk-bg: #232B4A; --unk-fg: #B9C6FF;
+  --gen-bg: #26313D; --gen-fg: #C3CDD7; --carried-bg: #2D2250; --carried-fg: #CBB8FF;
+  --rule-fg: #8FE0C0;
+  --ok-bg: #11351F; --ok-line: #43C072;
+  --warn-bg: #45300E; --warn-line: #E39A2D; --warn-fg: #FFD387; --warn-on: #1A1206;
+  --danger: #F2665E; --danger-on: #1A0B0A; --danger-bg: #461414;
+  --hatch-a: #1E2833; --hatch-b: #26313D; --manual-bg: #2E2410; --manual-line: #6B5420;
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.5); --scrim: rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+@media print {
+  :root:root:root {
+    --bg: #F2F4F7; --surface: #FFFFFF; --surface-2: #F7F9FB; --line: #DCE2E8; --line-strong: #C3CCD5;
+    --fg: #1C2733; --fg-muted: #51606E; --accent: #1F4FD1; --accent-fg: #FFFFFF;
+    --hepb-bg: #FDE2E1; --hepb-fg: #9B1C1C; --contact-bg: #FEF0C7; --contact-fg: #8A3B08;
+    --iso-bg: #DDF2F6; --iso-fg: #0F5A6E; --unk-bg: #E4E9FB; --unk-fg: #2F3F8F;
+    --gen-bg: #ECEFF3; --gen-fg: #3B4856; --carried-bg: #ECE7FE; --carried-fg: #5520B0;
+    --rule-fg: #0B5E43;
+    --ok-bg: #DCFAE6; --ok-line: #15803D;
+    --warn-bg: #FEF0C7; --warn-line: #B45309; --warn-fg: #8A3B08; --warn-on: #FFFFFF;
+    --danger: #B42318; --danger-on: #FFFFFF; --danger-bg: #FEE4E2;
+    --hatch-a: #E8ECF0; --hatch-b: #DCE1E7; --manual-bg: #FFF8E6; --manual-line: #EACB86;
+    --shadow: 0 10px 28px rgba(16, 24, 40, 0.18); --scrim: rgba(16, 24, 40, 0.55);
+    color-scheme: light;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.45; }
+body.dragging { user-select: none; -webkit-user-select: none; }
+body.dragging, body.dragging * { cursor: grabbing !important; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+button { font: inherit; color: inherit; }
+.app { max-width: 1480px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; display: flex; flex-direction: column; gap: 18px; }
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.brand { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.brand-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.brand h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+.meta { color: var(--fg-muted); font-size: 14px; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.btn { min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--fg); font-family: var(--font-ui); font-size: 14px; font-weight: 700; cursor: pointer; }
+.btn:hover { background: var(--surface-2); }
+.btn:focus-visible, .tile:focus-visible, .mtile:focus-visible, .icon-btn:focus-visible, .menu button:focus-visible, .tick input:focus-visible, .sec-head:focus-visible, .chip-x:focus-visible, .shape:focus-visible, .switch:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); padding: 0 22px; }
+.btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+.btn-warn { border-color: var(--warn-line); color: var(--warn-fg); }
+.btn-danger { background: var(--danger); border-color: var(--danger); color: var(--danger-on); }
+.btn-danger:hover { background: var(--danger); filter: brightness(1.06); }
+.btn-warn-solid { background: var(--warn-line); border-color: var(--warn-line); color: var(--warn-on); }
+.btn-warn-solid:hover { background: var(--warn-line); filter: brightness(1.06); }
+.btn-sm { font-size: 13px; padding: 0 14px; min-height: 36px; }
+.btn:disabled, .icon-btn:disabled { opacity: 0.4; cursor: default; filter: none; }
+.btn:disabled:hover { background: var(--surface); }
+.btn-primary:disabled, .btn-primary:disabled:hover { background: var(--accent); }
+.badge-n { display: inline-flex; min-width: 20px; justify-content: center; margin-left: 6px; font-family: var(--font-code); font-size: 12px; border-radius: 999px; padding: 0 6px; background: var(--contact-bg); color: var(--contact-fg); }
+.board { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.board-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.table-scroll { overflow-x: auto; padding-bottom: 4px; }
+.grid { display: grid; grid-template-columns: 152px repeat(var(--sessions, 5), minmax(150px, 1fr)); gap: 6px; min-width: calc(152px + var(--sessions, 5) * 156px); }
+.row { display: contents; }
+.colhead { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); background: var(--surface-2); border-radius: 6px; padding: 8px 10px; }
+.rowhead { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; padding: 6px 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; min-height: 60px; }
+.mname { font-size: 15px; font-weight: 700; cursor: pointer; background: none; border: 0; padding: 0; font-family: inherit; color: inherit; }
+.mname:hover { text-decoration: underline; }
+.p-custom { background: var(--contact-bg); color: var(--contact-fg); }
+.rename { width: 84px; min-height: 36px; padding: 0 8px; border: 2px solid var(--accent); border-radius: 6px; background: var(--surface); color: var(--fg); font-family: var(--font-ui); font-size: 15px; font-weight: 700; }
+.pill { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; border-radius: 4px; padding: 2px 6px; white-space: nowrap; line-height: 1.2; }
+.p-hepb, .b-hepb { background: var(--hepb-bg); color: var(--hepb-fg); }
+.p-iso, .b-iso { background: var(--iso-bg); color: var(--iso-fg); }
+.p-mdro, .p-mrsa, .b-contact { background: var(--contact-bg); color: var(--contact-fg); }
+.p-unknown, .b-unknown { background: var(--unk-bg); color: var(--unk-fg); }
+.p-clean, .p-general, .p-sample { background: var(--gen-bg); color: var(--gen-fg); }
+.p-out { background: var(--fg); color: var(--surface); }
+.p-sample { font-size: 12px; border-radius: 999px; padding: 3px 10px; }
+.carried { background: var(--carried-bg); color: var(--carried-fg); font-family: var(--font-code); font-weight: 600; }
+.cell { min-height: 60px; display: flex; border-radius: 8px; min-width: 0; }
+.cell.empty { border: 1px dashed var(--line-strong); background: var(--surface-2); }
+.cell.blocked { align-items: center; gap: 6px; padding: 6px 10px; background: repeating-linear-gradient(135deg, var(--hatch-a) 0 8px, var(--hatch-b) 8px 16px); color: var(--fg-muted); font-size: 12px; font-weight: 700; }
+.cell.hl-ok { background: var(--ok-bg); border: 2px solid var(--ok-line); }
+.cell.hl-warn { background: var(--warn-bg); border: 2px solid var(--warn-line); color: var(--warn-fg); align-items: center; justify-content: center; text-align: center; padding: 0 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
+.cell.hl-hepb { background: var(--danger-bg); border: 2px solid var(--danger); color: var(--hepb-fg); align-items: center; justify-content: center; text-align: center; padding: 0 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
+.cell.hover { outline: 3px solid var(--fg); outline-offset: 1px; }
+.tile { flex: 1; min-width: 0; width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px; text-align: left; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.tile:hover { border-color: var(--fg-muted); }
+.tile.red { border: 2px solid var(--danger); background: var(--danger-bg); padding: 5px 7px; }
+.tile.lifted { opacity: 0.35; }
+.t-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; min-width: 0; }
+.t-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-bed { font-family: var(--font-code); font-size: 12px; font-weight: 500; color: var(--fg-muted); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.t-name { flex-shrink: 0; max-width: 62%; }
+.t-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.t-right { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--fg-muted); }
+.ic-alert { color: var(--danger); }
+.pools { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 18px; }
+.pool { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pool.manual { flex: 1 1 320px; }
+.pool.notdone { flex: 2 1 520px; }
+.pool h2 { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+.pool h2 .ic { color: var(--warn-line); }
+.count { font-family: var(--font-code); font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 8px; background: var(--gen-bg); color: var(--gen-fg); }
+.count.warn { background: var(--contact-bg); color: var(--contact-fg); }
+.pool.drop-target { outline: 3px dashed var(--accent); outline-offset: 3px; }
+.pool.drop-target.hover { background: var(--surface-2); }
+.groups { display: flex; flex-direction: column; gap: 14px; }
+.group { display: flex; flex-direction: column; gap: 6px; }
+.g-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); }
+.g-head.overdue { color: var(--warn-fg); }
+.pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 8px; }
+.pool-grid:empty { min-height: 48px; border: 1px dashed var(--line-strong); border-radius: 8px; }
+.manual-list { display: flex; flex-direction: column; gap: 8px; }
+.mtile { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px; padding: 8px 10px; background: var(--manual-bg); border: 1px solid var(--manual-line); border-radius: 8px; text-align: left; cursor: pointer; }
+.m-left { display: inline-flex; align-items: baseline; gap: 8px; min-width: 0; }
+.m-reason { font-size: 12px; font-weight: 700; color: var(--contact-fg); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 50%; }
+.pool.bin { flex: 1 1 100%; padding-top: 4px; }
+.pool.bin.folded { padding-bottom: 4px; }
+.btile { background: var(--surface-2); border-color: var(--line); cursor: default; }
+.b-at { font-family: var(--font-code); font-size: 12px; color: var(--fg-muted); white-space: nowrap; }
+#cDelete { margin-left: auto; border-color: var(--danger); color: var(--danger); }
+.w-note { white-space: pre-line; }
+.ghost { position: fixed; z-index: 70; width: 200px; pointer-events: none; transform: translate(-50%, -60%) rotate(-2deg); box-shadow: var(--shadow); border-radius: 8px; display: flex; }
+.scrim { position: fixed; inset: 0; z-index: 50; background: var(--scrim); display: flex; align-items: center; justify-content: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.dialog { width: min(440px, 100%); max-height: 100%; overflow: auto; background: var(--surface); color: var(--fg); border-radius: 12px; box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.dialog.wide { width: min(1000px, 100%); }
+.dialog.mid { width: min(720px, 100%); }
+.dialog.pick { width: min(780px, 100%); }
+.dialog.alert { padding: 0; gap: 0; }
+.dialog > * { flex-shrink: 0; }
+.d-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.d-titles { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.d-head h2 { font-size: 20px; font-weight: 700; }
+.icon-btn { width: 44px; height: 44px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--fg); cursor: pointer; }
+.d-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: -8px; }
+.d-list { margin: 0; display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 6px 12px; font-size: 14px; }
+.d-list dt { color: var(--fg-muted); }
+.d-list dd { margin: 0; }
+.mono { font-family: var(--font-code); font-size: 13px; }
+.d-sec { display: flex; flex-direction: column; gap: 6px; }
+.d-sec h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); }
+.d-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.d-actions.end { justify-content: flex-end; }
+.w-body { display: flex; flex-direction: column; gap: 8px; }
+.w-label { font-size: 13px; font-weight: 700; color: var(--fg-muted); }
+.w-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.w-note { margin: 0; font-size: 14px; }
+.ra-band { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: var(--danger); color: var(--danger-on); border-radius: 12px 12px 0 0; }
+.ra-band h2 { font-size: 18px; font-weight: 700; }
+.ra-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.ra-move { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
+.ra-move span { display: inline-flex; align-items: center; gap: 6px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label, .ra-body label { font-size: 13px; font-weight: 700; color: var(--fg-muted); }
+input[type="text"], input[type="date"], input[type="number"], select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--fg); font-family: var(--font-ui); font-size: 15px; }
+input[type="text"]:focus-visible, input[type="date"]:focus-visible, input[type="number"]:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; display: block; width: 100%; box-sizing: border-box; height: 44px; line-height: 36px; }
+input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+input.flagged, select.flagged { border: 2px solid var(--warn-line); background: var(--warn-bg); }
+#dRem { white-space: pre-line; }
+.ticks { display: flex; flex-wrap: wrap; gap: 2px 16px; }
+.tick { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 14px; cursor: pointer; }
+.tick input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.c-body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 18px; reading-flow: grid-rows; }
+.c-why { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 12px; border: 1px solid var(--manual-line); border-radius: 10px; background: var(--manual-bg); }
+.c-why h3 { font-size: 13px; font-weight: 700; color: var(--contact-fg); }
+.why-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 10px 18px; }
+.why { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.why p { margin: 0; font-size: 14px; }
+.why-t { font-weight: 700; }
+.c-pdf { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.c-file { display: flex; justify-content: space-between; gap: 8px; font-family: var(--font-code); font-size: 12px; color: var(--fg-muted); }
+.c-pdf .form-view { min-height: 360px; max-height: 560px; }
+.form-view { max-height: 320px; overflow: auto; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface-2); padding: 10px 12px; overflow-wrap: anywhere; }
+.form-view h4 { margin: 14px 0 6px; font-size: 13px; font-weight: 700; }
+.form-view h4:first-child { margin-top: 0; }
+.form-view .d-list { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+.form-view dd { white-space: pre-line; }
+.c-form { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.c-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.quote { margin: 0; font-style: italic; font-size: 14px; }
+
+.set-app .topbar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.set-app .topbar .btn { justify-self: start; white-space: nowrap; }
+.set-app .actions { gap: 8px; align-items: stretch; }
+.sec { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.sec.folded { padding-bottom: 4px; }
+.sec-head { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 0; border: 0; border-radius: 6px; background: none; text-align: left; cursor: pointer; }
+.sec-h { font-size: 17px; font-weight: 700; }
+.chev { display: inline-block; width: 16px; font-size: 20px; line-height: 1; text-align: center; color: var(--fg-muted); }
+.dirty { color: var(--accent); font-size: 13px; font-weight: 700; }
+.sec-body { display: flex; flex-direction: column; gap: 10px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); }
+.set-row:first-child { border-top: 0; padding-top: 0; }
+.set-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.set-title { font-weight: 700; }
+.set-desc { font-size: 13px; color: var(--fg-muted); overflow-wrap: anywhere; }
+.sw-wrap { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; font-size: 14px; font-weight: 700; cursor: pointer; }
+.switch { appearance: none; -webkit-appearance: none; position: relative; flex-shrink: 0; width: 44px; height: 24px; margin: 0; border-radius: 999px; background: var(--line-strong); cursor: pointer; transition: background 0.15s; }
+.switch::before { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(16, 24, 40, 0.3); transition: transform 0.15s; }
+.switch:checked { background: var(--accent); }
+.switch:checked::before { background: var(--accent-fg); transform: translateX(20px); }
+.theme-sw { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-left: 12px; color: var(--fg-muted); cursor: pointer; }
+.theme-sw .ic-sun, .theme-sw:has(.switch:checked) .ic-moon { color: var(--fg); }
+.theme-sw:has(.switch:checked) .ic-sun { color: var(--fg-muted); }
+.part { font-size: 13px; font-weight: 700; color: var(--fg-muted); }
+.part ~ .part { margin-top: 8px; }
+.rules { display: flex; flex-direction: column; gap: 8px; position: relative; }
+.grip { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 44px; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--fg-muted); cursor: grab; touch-action: none; }
+.grip:hover { color: var(--fg); background: var(--line); }
+.row-drag { position: relative; z-index: 5; box-shadow: var(--shadow); }
+.drop-line { position: absolute; left: 0; right: 0; height: 3px; border-radius: 2px; background: var(--accent); pointer-events: none; }
+.stat { display: grid; grid-template-columns: 20px 220px minmax(0, 1fr) 44px 44px; align-items: center; gap: 8px 10px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.s-name { font-weight: 700; }
+.s-use { line-height: 44px; font-size: 14px; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.line { display: grid; grid-template-columns: 20px minmax(0, 1fr) 44px 44px; align-items: start; gap: 8px 10px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.line > .s-dup, .stat > .s-dup { grid-column: 2 / -1; }
+.stat input.dup { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+.sent, .if, .then { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 10px; min-width: 0; }
+.if, .then { flex-basis: 100%; }
+.w { display: inline-flex; align-items: center; min-height: 44px; white-space: nowrap; }
+.sent select { width: auto; height: 44px; field-sizing: content; }
+.sent .t-box { width: 233px; max-width: 100%; field-sizing: fixed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sent [data-k="mode"] { width: 113px; field-sizing: fixed; }
+.sent [data-k="session"] { width: 209px; max-width: 100%; field-sizing: fixed; }
+.sent .t-status { width: 198px; max-width: 100%; field-sizing: fixed; }
+.sent input[type="number"] { width: 90px; text-align: right; -moz-appearance: textfield; appearance: textfield; }
+.sent input[type="number"]::-webkit-outer-spin-button, .sent input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.s-dup { font-size: 13px; font-weight: 700; color: var(--danger); }
+.sw-fixed { display: inline-flex; align-items: center; min-height: 44px; flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--fg-muted); }
+.chips { flex: 1 1 260px; min-width: min(260px, 100%); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); cursor: text; }
+.chips:has(.chip-in:focus) { outline: 3px solid var(--accent); outline-offset: 1px; }
+.chip { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 30px; padding: 0 3px 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); font-size: 14px; line-height: 1.2; overflow-wrap: anywhere; cursor: default; }
+.chip-t { padding-top: 2px; }
+.chip.dup { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+.chip-x { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
+.chip-x:hover { background: var(--line); }
+.chips input.chip-in { flex: 0 1 auto; width: auto; field-sizing: content; min-width: 90px; max-width: 100%; min-height: 30px; padding: 0 4px; border: 0; background: none; }
+.chips input.chip-in:focus-visible { outline: none; }
+.shapes { display: flex; flex-direction: column; gap: 8px; }
+.shape { display: block; width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface-2); color: var(--fg); text-align: left; line-height: 1.45; cursor: pointer; }
+.shape:hover { border-color: var(--accent); }
+.blank { color: var(--fg-muted); }
+@supports (appearance: base-select) {
+  .t-box, .t-box::picker(select) { appearance: base-select; }
+  .t-box { display: inline-flex; align-items: center; gap: 8px; }
+  .t-box::picker-icon { color: var(--fg-muted); }
+  .t-box > button { display: flex; flex: 1 1 auto; min-width: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; }
+  .t-box selectedcontent { display: block; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .t-box::picker(select) { max-height: min(460px, 70vh); padding: 4px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+  .t-box optgroup { padding-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--fg-muted); }
+  .t-box optgroup legend { padding: 4px 10px 2px; }
+  .t-box option { min-height: 34px; padding: 4px 10px; border-radius: 6px; font-size: 15px; font-weight: 400; letter-spacing: 0; color: var(--fg); }
+  .t-box option:hover, .t-box option:focus-visible { background: var(--surface-2); outline: none; }
+  .t-box option:checked { font-weight: 700; }
+}
+@media (max-width: 560px) {
+  .stat { grid-template-columns: 20px minmax(0, 1fr) 44px 44px; }
+  .s-use { grid-column: 2 / -1; grid-row: 2; line-height: 1.45; }
+  .w { white-space: normal; }
+  .line > .sent { grid-area: 2 / 1 / 3 / -1; }
+  .line > [data-do="copy"] { grid-area: 1 / 3; }
+  .line > [data-do="del"] { grid-area: 1 / 4; }
+  .line > .s-dup { grid-column: 1 / -1; }
+}
+.empty-note { color: var(--fg-muted); font-size: 14px; }
+.menu { position: fixed; z-index: 60; min-width: 200px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 10px; box-shadow: var(--shadow); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.menu button { min-height: 44px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; text-align: left; font-size: 14px; cursor: pointer; }
+.menu button:hover { background: var(--surface-2); }
+.colhead, .rowhead, .cell, .tile, .mtile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.rename { -webkit-user-select: text; user-select: text; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 80; background: var(--fg); color: var(--surface); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; box-shadow: var(--shadow); }
+.ic { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .c-body { grid-template-columns: minmax(0, 1fr); }
+  .c-pdf, .c-form { grid-column: auto; grid-row: auto; }
+  .c-pdf .form-view { min-height: 160px; }
+  .c-fields { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+textarea { width: 100%; min-height: 220px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--fg); font-family: var(--font-code); font-size: 12px; line-height: 1.5; resize: vertical; }
+textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.field textarea { min-height: 64px; font-family: var(--font-ui); font-size: 15px; }
+.span2 { grid-column: 1 / -1; }
+.pill-btn { border: 0; cursor: pointer; font-family: inherit; min-height: 28px; padding: 0 10px; font-size: 12px; }
+.p-saved { background: var(--ok-bg); color: var(--rule-fg); }
+.p-bad { background: var(--danger-bg); color: var(--danger); }
+.hint { color: var(--warn-fg); font-weight: 700; margin-left: 8px; }
+.start-actions { display: flex; flex-direction: column; gap: 10px; }
+.err { color: var(--danger); font-size: 14px; margin: 0; }
+.err:empty, .empty-note:empty { display: none; }
+.stamp { font-size: 12px; color: var(--fg-muted); margin: 0; }
+@media print {
+  .actions, .board-tools, .pools, .scrim, .menu, .toast { display: none !important; }
+  body { background: #fff; color: #000; }
+  .tile.red { border: 2px solid #000; }
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="boardView">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-row">
+        <h1>Citrix Dialysis Allocator</h1>
+        <button type="button" class="pill pill-btn p-bad" id="saveState" title="Data folder">No folder</button>
+      </div>
+      <div class="meta"><span id="dayLine"></span><span class="hint" id="dayHint" hidden>New day?</span></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="refreshBtn">Refresh</button>
+      <button type="button" class="btn btn-primary" id="autoSlot">Auto slot</button>
+      <button type="button" class="btn" id="resetBtn">Reset</button>
+      <button type="button" class="btn" id="printBtn">Print</button>
+      <button type="button" class="btn btn-warn" id="newDay">New day</button>
+      <button type="button" class="btn" id="settingsBtn">Settings</button>
+      <label class="theme-sw"><svg class="ic ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M4.9 4.9l1.4 1.4"></path><path d="M17.7 17.7l1.4 1.4"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M4.9 19.1l1.4-1.4"></path><path d="M17.7 6.3l1.4-1.4"></path></svg><input type="checkbox" role="switch" class="switch" id="themeSw" aria-label="Dark theme"><svg class="ic ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></label>
+    </div>
+  </header>
+
+  <section class="board" aria-label="Machines and sessions">
+    <div class="board-tools">
+      <button type="button" class="btn btn-sm" id="addSession" aria-label="Add session">+ Session</button>
+      <button type="button" class="btn btn-sm" id="addMachine" aria-label="Add machine">+ Machine</button>
+    </div>
+    <div class="table-scroll">
+      <div class="grid" id="grid" role="table" aria-label="Machines by sessions"></div>
+    </div>
+  </section>
+
+  <section class="pools" aria-label="Order pools">
+    <div class="pool manual">
+      <h2><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5"></path><path d="M12 18v.5"></path></svg>Need manual intervention <span class="count warn" id="manualCount">0</span></h2>
+      <div class="manual-list" id="manualList"></div>
+    </div>
+    <div class="pool notdone" id="notDonePool">
+      <h2>Unallocated <span class="count" id="notDoneCount">0</span></h2>
+      <div class="groups" id="notDoneGroups"></div>
+    </div>
+    <div class="pool bin folded" id="binPool" data-sec>
+      <h2><button type="button" class="sec-head" aria-expanded="false" aria-controls="binBody"><span class="chev" aria-hidden="true">▸</span><span>Recycle bin</span><span class="count" id="binCount">0</span></button></h2>
+      <div class="sec-body" id="binBody" hidden><div class="pool-grid" id="binList"></div></div>
+    </div>
+  </section>
+</div>
+
+<div class="app set-app" id="settingsView" hidden>
+  <header class="topbar">
+    <button type="button" class="btn" id="backBtn">← Back to board</button>
+    <h1>Settings</h1>
+  </header>
+
+  <section class="sec" data-sec>
+    <h2 class="sec-h"><button type="button" class="sec-head" aria-expanded="true" aria-controls="genBody"><span class="chev" aria-hidden="true">▾</span><span>General</span></button></h2>
+    <div class="sec-body" id="genBody">
+      <div class="set-row">
+        <div class="set-text"><span class="set-title">Data folder</span><span class="set-desc" id="setData"></span></div>
+        <button type="button" class="btn btn-sm" id="setDataBtn" aria-label="Choose data folder">Choose</button>
+      </div>
+      <div class="set-row">
+        <div class="set-text"><span class="set-title">Orders folder</span><span class="set-desc" id="setOrders"></span></div>
+        <button type="button" class="btn btn-sm" id="setOrdersBtn" aria-label="Choose orders folder">Choose</button>
+      </div>
+      <div class="set-row">
+        <div class="set-text"><span class="set-title" id="reviewTitle">Review new orders</span><span class="set-desc">Each new order goes to manual review before it can be allocated</span></div>
+        <label class="sw-wrap"><span id="reviewWord">On</span><input type="checkbox" role="switch" class="switch" id="reviewSw" aria-labelledby="reviewTitle" checked></label>
+      </div>
+      <p class="stamp" id="genStamp"></p>
+    </div>
+  </section>
+
+  <section class="sec" data-sec>
+    <h2 class="sec-h"><button type="button" class="sec-head" aria-expanded="true" aria-controls="centreBody"><span class="chev" aria-hidden="true">▾</span><span>Dialysis centres</span><span class="dirty" id="centresDirty" hidden>● changed</span></button></h2>
+    <div class="sec-body" id="centreBody">
+      <div class="set-desc">An order's Usual Dialysis Centre box must hold one of these words. Anything else reads as not found.</div>
+      <div id="centreList"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="centresRestore">Restore defaults</button>
+        <button type="button" class="btn btn-primary" id="centresApply" disabled>Apply</button>
+      </div>
+      <div class="set-row">
+        <div class="set-text"><span class="set-title" id="centreTitle">Review unknown centres</span><span class="set-desc">Each order whose Usual Dialysis Centre matches none of these words goes to manual review before it can be allocated</span></div>
+        <label class="sw-wrap"><span id="centreWord">Off</span><input type="checkbox" role="switch" class="switch" id="centreSw" aria-labelledby="centreTitle"></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" data-sec>
+    <h2 class="sec-h"><button type="button" class="sec-head" aria-expanded="true" aria-controls="statusBody"><span class="chev" aria-hidden="true">▾</span><span>Matching rules</span><span class="dirty" id="statusDirty" hidden>● changed</span></button></h2>
+    <div class="sec-body" id="statusBody">
+      <h3 class="part">Statuses</h3>
+      <div class="rules" id="statList"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="statAdd">+ Status</button>
+      </div>
+      <h3 class="part">Rules</h3>
+      <div class="rules" id="matchList"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="matchAdd">+ Rule</button>
+        <button type="button" class="btn" id="statusRestore">Restore defaults</button>
+        <button type="button" class="btn btn-primary" id="statusApply" disabled>Apply</button>
+      </div>
+      <h3 class="part">Built-in checks</h3>
+      <div class="set-desc">A check sends the order to Need manual intervention with its code. Off means the order goes on.</div>
+      <div id="builtinList"></div>
+    </div>
+  </section>
+
+  <section class="sec" data-sec>
+    <h2 class="sec-h"><button type="button" class="sec-head" aria-expanded="true" aria-controls="rulesBody"><span class="chev" aria-hidden="true">▾</span><span>Allocation rules</span><span class="dirty" id="rulesDirty" hidden>● changed</span></button></h2>
+    <div class="sec-body" id="rulesBody">
+      <div class="rules" id="ruleList"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="ruleAdd">+ Rule</button>
+        <button type="button" class="btn" id="rulesRestore">Restore defaults</button>
+        <button type="button" class="btn btn-primary" id="rulesApply" disabled>Apply</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="scrim" id="startScrim" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+    <div class="d-head"><h2 id="sTitle">Data folder</h2><button type="button" class="icon-btn" data-close id="sClose" hidden aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button></div>
+    <p class="empty-note" id="sMsg"></p>
+    <div class="start-actions">
+      <button type="button" class="btn btn-primary" id="sContinue" hidden>Continue</button>
+      <button type="button" class="btn btn-primary" id="sRetry" hidden>Save again</button>
+      <button type="button" class="btn" id="sChoose">Choose data folder</button>
+      <button type="button" class="btn btn-warn" id="sOff">Work without saving</button>
+    </div>
+    <p class="err" id="sErr"></p>
+    <p class="stamp" id="sStamp"></p>
+  </div>
+</div>
+
+<div class="scrim" id="detailsScrim" hidden>
+  <div class="dialog mid" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="d-head">
+      <div class="d-titles"><h2 id="dTitle">Patient</h2><span class="t-bed" id="dBed"></span></div>
+      <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="d-tags" id="dTags"></div>
+    <dl class="d-list">
+      <dt>IC</dt><dd class="mono" id="dIc"></dd>
+      <dt>Order</dt><dd class="mono" id="dOrder"></dd>
+      <dt>Date</dt><dd id="dDate"></dd>
+      <dt>Treatment</dt><dd id="dTreat"></dd>
+      <dt>Priority</dt><dd id="dUrg"></dd>
+      <dt>Points</dt><dd id="dPts"></dd>
+      <dt>Usual centre</dt><dd id="dCentre"></dd>
+      <dt id="dRemT">Remarks</dt><dd id="dRem"></dd>
+      <dt id="dRadT">Bookings</dt><dd id="dRad"></dd>
+      <dt id="dVirT">Virology</dt><dd id="dVir"></dd>
+    </dl>
+    <section class="d-sec"><h3>Status</h3><div class="ticks" id="dTicks"></div></section>
+    <section class="d-sec" id="dTextSec" hidden><h3>Order text</h3><div class="form-view" id="dText"></div></section>
+    <div class="d-actions">
+      <button type="button" class="btn" id="dTextBtn">Order text</button>
+      <button type="button" class="btn" id="dBack">Back to Unallocated</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="redScrim" hidden>
+  <div class="dialog alert" role="alertdialog" aria-modal="true" aria-labelledby="raTitle">
+    <div class="ra-band">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5"></path><path d="M12 18v.5"></path></svg>
+      <h2 id="raTitle">Hep B line crossed</h2>
+    </div>
+    <div class="ra-body">
+      <div class="ra-move"><span id="raFrom"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="onto"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg><span id="raTo"></span></div>
+      <div class="field">
+        <label for="raReason">Reason</label>
+        <input type="text" id="raReason" placeholder="e.g. Hep B machine full">
+      </div>
+      <div class="d-actions end">
+        <button type="button" class="btn" id="raCancel" data-autofocus>Cancel</button>
+        <button type="button" class="btn btn-danger" id="raConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="checkScrim" hidden>
+  <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+    <div class="d-head">
+      <h2 id="cTitle">Check order</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="c-body">
+      <section class="c-why" aria-labelledby="cWhyT"><h3 id="cWhyT">Why it is here</h3><div class="why-list" id="cWhy"></div></section>
+      <div class="c-form">
+        <div class="c-fields">
+          <div class="field span2"><label for="cName">Name</label><input type="text" id="cName"></div>
+          <div class="field"><label for="cIc">IC</label><input type="text" id="cIc"></div>
+          <div class="field"><label for="cBed">Bed</label><input type="text" id="cBed"></div>
+          <div class="field"><label for="cOrder">Order</label><input type="text" id="cOrder"></div>
+          <div class="field"><label for="cDate">Date</label><input type="date" id="cDate"></div>
+          <div class="field"><label for="cUrg">Priority</label><select id="cUrg"><option value=""></option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+          <div class="field"><label for="cTreat">Treatment</label><input type="text" id="cTreat"></div>
+          <div class="field span2"><label for="cRemarks">Remarks</label><textarea id="cRemarks"></textarea></div>
+        </div>
+        <div class="field"><label>Status</label><div class="ticks" id="cTicks"></div></div>
+        <div class="d-actions">
+          <button type="button" class="btn btn-primary" id="cAccept">Accept</button>
+          <button type="button" class="btn" id="cCancel">Cancel</button>
+          <button type="button" class="btn" id="cDelete">Delete</button>
+        </div>
+      </div>
+      <div class="c-pdf">
+        <div class="c-file" id="cFileRow"><span id="cFile"></span></div>
+        <div class="form-view" id="cPage"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="warnScrim" hidden>
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="wTitle">
+    <div class="d-head"><h2 id="wTitle">Remove?</h2></div>
+    <div class="w-body">
+      <span class="w-label" id="wLabel">Back to Unallocated</span>
+      <div class="w-list" id="wList"></div>
+      <p class="w-note" id="wNote" hidden></p>
+    </div>
+    <div class="d-actions end">
+      <button type="button" class="btn" id="wCancel" data-autofocus>Cancel</button>
+      <button type="button" class="btn btn-warn-solid" id="wConfirm">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="machScrim" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="d-head">
+      <h2 id="mTitle">Machine</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="field"><label for="mName">Name</label><input type="text" id="mName" maxlength="24"></div>
+    <section class="d-sec"><h3>Status</h3><div class="ticks" id="mTicks"></div></section>
+    <label class="tick" for="mOut"><input type="checkbox" id="mOut"> Out of service</label>
+    <div class="d-actions end">
+      <button type="button" class="btn" id="mCancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="mOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="removeScrim" hidden>
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="rmTitle" aria-describedby="rmText">
+    <div class="d-head"><h2 id="rmTitle"></h2></div>
+    <p class="w-note" id="rmText"></p>
+    <div class="d-actions end">
+      <button type="button" class="btn" id="rmKeep" data-autofocus>Keep</button>
+      <button type="button" class="btn btn-warn-solid" id="rmGo"></button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="leaveScrim" hidden>
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="leaveTitle">
+    <div class="d-head"><h2 id="leaveTitle"></h2><button type="button" class="icon-btn" id="leaveX" aria-label="Close"></button></div>
+    <div class="d-actions end">
+      <button type="button" class="btn" id="leaveDiscard">Discard</button>
+      <button type="button" class="btn btn-primary" id="leaveApply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="pickScrim" hidden>
+  <div class="dialog pick" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <div class="d-head"><h2 id="pickTitle">Pick a shape</h2></div>
+    <div class="shapes" id="shapeList"></div>
+    <div class="d-actions end">
+      <button type="button" class="btn" id="pickCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="menu" id="menu" role="menu" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var BUILD = { version: '1.0.0', date: '2026-11-06', source: '' };
+
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function dayNum(iso) { var p = iso.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; }
+  function addDays(iso, n) { return new Date((dayNum(iso) + n) * 86400000).toISOString().slice(0, 10); }
+  function fmt(iso, style) {
+    if (!iso) return '';
+    var p = iso.split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    var s = +p[2] + ' ' + MONTHS[+p[1] - 1];
+    if (style === 'day') return DAYS[d.getUTCDay()] + ' ' + s;
+    if (style === 'full') return DAYS[d.getUTCDay()] + ' ' + s + ' ' + p[0];
+    if (style === 'form') return (p[2]) + ' ' + MONTHS[+p[1] - 1] + ' ' + p[0];
+    return s;
+  }
+  function parseFormDate(s) {
+    var m = /(\d{1,2}) (\w{3}) (\d{4})/.exec(s || '');
+    if (!m) return '';
+    var mo = MONTHS.indexOf(m[2]);
+    if (mo < 0) return '';
+    return m[3] + '-' + ('0' + (mo + 1)).slice(-2) + '-' + ('0' + m[1]).slice(-2);
+  }
+  function two(n) { return (n < 10 ? '0' : '') + n; }
+  function localDate(d) { d = d || new Date(); return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()); }
+  function now() { var d = new Date(); return localDate(d) + ' ' + two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()); }
+  function fileStamp() { var d = new Date(); return localDate(d) + '_' + two(d.getHours()) + two(d.getMinutes()) + two(d.getSeconds()); }
+  var TODAY = localDate();
+
+  var STATUS_START = [{ id: 'mrsa', name: 'MRSA' }, { id: 'vre', name: 'VRE' }, { id: 'cpcre', name: 'CP-CRE' }, { id: 'cdiff', name: 'C. diff' }, { id: 'isolation', name: 'Isolation' }, { id: 'unknown', name: 'Unknown' }, { id: 'hepb', name: 'Hep B' }];
+  var STATUSES = [], BADGE = {}, TICK = {};
+  function useStatuses(list) {
+    STATUSES = list.map(function (s) { return s.id; }); BADGE = {}; TICK = {};
+    list.forEach(function (s) { TICK[s.id] = String(s.name).trim(); BADGE[s.id] = TICK[s.id].toUpperCase(); });
+  }
+  function byStatus(a, b) { return STATUSES.indexOf(a) - STATUSES.indexOf(b); }
+  useStatuses(STATUS_START);
+  var ISO = ['cpcre', 'cdiff', 'isolation'], MDRO = ['mrsa', 'vre', 'cpcre'];
+  var SPECIAL = [[], ['mrsa'], MDRO, ISO, ['unknown'], ['hepb']];
+  function sameSet(a, b) { return a.length === b.length && a.every(function (x) { return b.indexOf(x) >= 0; }); }
+  function rankOf(m) { for (var i = 0; i < SPECIAL.length; i++) if (sameSet(SPECIAL[i], m.takes)) return i; return 0.5 + m.takes.length; }
+  function takesLabel(m) { if (!m.takes.length) return 'CLEAN'; if (sameSet(m.takes, ISO)) return 'ISOLATION'; return m.takes.map(function (s) { return BADGE[s]; }).join('/'); }
+  var PRI_RULE = { 1: 'Emergency', 2: 'Urgent', 3: 'Routine' };
+
+  function fit(t, m) {
+    var hasHepb = t.statuses.indexOf('hepb') >= 0;
+    if ((m.takes.indexOf('hepb') >= 0) !== hasHepb) return { state: 'hepb', label: BADGE.hepb };
+    var bad = t.statuses.filter(function (x) { return m.takes.indexOf(x) < 0; });
+    if (bad.length) return { state: 'warn', label: bad.map(function (x) { return BADGE[x]; }).join('/') };
+    if (m.takes.length && !t.statuses.length) return { state: 'warn', label: takesLabel(m) };
+    return { state: 'ok' };
+  }
+
+  function waited(t) { return t.date ? Math.max(0, dayNum(TODAY) - dayNum(t.date)) : 0; }
+  function cellOf(t, s) { return (t.fired || []).reduce(function (n, r) { return n + (r.boxes[s] || 0); }, 0); }
+  function cellsOf(t) { var c = []; for (var s = 0; s < state.sessions; s++) c.push(cellOf(t, s)); return c; }
+  function score(t) { return Math.max.apply(null, cellsOf(t)); }
+
+  var PDF_ID = [1, 0, 0, 1, 0, 0], PDF_NEED = { need: true };
+  function pdfStop(reason, quote) { return { stop: reason, quote: quote }; }
+  function latin1(bytes) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + 32768, bytes.length)));
+    return s;
+  }
+  function pdfWs(c) { return c === 32 || c === 10 || c === 13 || c === 9 || c === 12 || c === 0; }
+  function pdfDelim(c) { return c === 40 || c === 41 || c === 60 || c === 62 || c === 91 || c === 93 || c === 123 || c === 125 || c === 47 || c === 37; }
+  function pdfLexer(s, p) {
+    var lx = { p: p || 0 };
+    lx.next = function () {
+      var n = s.length, c;
+      for (;;) {
+        while (lx.p < n && pdfWs(s.charCodeAt(lx.p))) lx.p++;
+        if (lx.p >= n) return null;
+        if (s.charCodeAt(lx.p) !== 37) break;
+        while (lx.p < n && s.charCodeAt(lx.p) !== 10 && s.charCodeAt(lx.p) !== 13) lx.p++;
+      }
+      c = s.charAt(lx.p);
+      if (c === '<' && s.charAt(lx.p + 1) === '<') { lx.p += 2; return '<<'; }
+      if (c === '>' && s.charAt(lx.p + 1) === '>') { lx.p += 2; return '>>'; }
+      if (c === '[' || c === ']' || c === '{' || c === '}') { lx.p++; return c; }
+      if (c === '<') {
+        var e = s.indexOf('>', lx.p); if (e < 0) e = n;
+        var hex = s.slice(lx.p + 1, e).replace(/[^0-9a-fA-F]/g, ''), str = '';
+        if (hex.length % 2) hex += '0';
+        for (var h = 0; h < hex.length; h += 2) str += String.fromCharCode(parseInt(hex.substr(h, 2), 16));
+        lx.p = e + 1; return { $s: str };
+      }
+      if (c === '(') {
+        var depth = 1, out = '', i = lx.p + 1;
+        while (i < n) {
+          var ch = s.charAt(i++);
+          if (ch === '\\') {
+            var x = s.charAt(i++);
+            if (x === 'n') out += '\n'; else if (x === 'r') out += '\r'; else if (x === 't') out += '\t'; else if (x === 'b') out += '\b'; else if (x === 'f') out += '\f';
+            else if (x >= '0' && x <= '7') { var o = x; while (o.length < 3 && s.charAt(i) >= '0' && s.charAt(i) <= '7') o += s.charAt(i++); out += String.fromCharCode(parseInt(o, 8) & 255); }
+            else if (x === '\r') { if (s.charAt(i) === '\n') i++; }
+            else if (x !== '\n') out += x;
+          } else if (ch === '(') { depth++; out += ch; }
+          else if (ch === ')') { if (--depth === 0) break; out += ch; }
+          else out += ch;
+        }
+        lx.p = i; return { $s: out };
+      }
+      var a = lx.p;
+      if (c === '/') lx.p++;
+      while (lx.p < n && !pdfWs(s.charCodeAt(lx.p)) && !pdfDelim(s.charCodeAt(lx.p))) lx.p++;
+      if (lx.p === a) { lx.p++; return c; }
+      var w = s.slice(a, lx.p);
+      if (c === '/') return w.replace(/#([0-9a-fA-F]{2})/g, function (m, hx) { return String.fromCharCode(parseInt(hx, 16)); });
+      if (/^[+-]?(\d+\.?\d*|\.\d+)$/.test(w)) return parseFloat(w);
+      return w;
+    };
+    return lx;
+  }
+  function pdfValue(lx, t, noRef) {
+    if (t === undefined) t = lx.next();
+    if (t === '<<') { var d = {}; for (;;) { var k = lx.next(); if (k === '>>' || k === null) return d; if (typeof k === 'string' && k.charAt(0) === '/') d[k.slice(1)] = pdfValue(lx, undefined, noRef); } }
+    if (t === '[') { var arr = []; for (;;) { var v = lx.next(); if (v === ']' || v === null) return arr; arr.push(pdfValue(lx, v, noRef)); } }
+    if (typeof t === 'number' && !noRef && t % 1 === 0) {
+      var save = lx.p, g = lx.next();
+      if (typeof g === 'number' && lx.next() === 'R') return { $r: t };
+      lx.p = save;
+    }
+    if (t === 'true') return true;
+    if (t === 'false') return false;
+    if (t === 'null') return null;
+    return t;
+  }
+  function pdfResolve(doc, v) { return v && v.$r !== undefined ? pdfFetch(doc, v.$r) : v; }
+  function pdfObjAt(doc, off) {
+    var s = doc.s, lx = pdfLexer(s, off);
+    var num = lx.next(); lx.next();
+    if (typeof num !== 'number' || lx.next() !== 'obj') return undefined;
+    var v = pdfValue(lx), save = lx.p;
+    if (lx.next() !== 'stream' || !v || typeof v !== 'object') { lx.p = save; return v; }
+    var p = lx.p, len = pdfResolve(doc, v.Length), end;
+    if (s.charCodeAt(p) === 13) p++;
+    if (s.charCodeAt(p) === 10) p++;
+    if (typeof len === 'number' && len >= 0 && /^[\0\t\n\f\r ]*endstream/.test(s.substr(p + len, 40))) end = p + len;
+    else { end = s.indexOf('endstream', p); if (end < 0) end = s.length; }
+    return { $stream: true, dict: v, start: p, end: end };
+  }
+  function pdfScan(doc) {
+    if (doc.scan) return doc.scan;
+    var s = doc.s, re = /(\d+)[\0\t\n\f\r ]+\d+[\0\t\n\f\r ]+obj\b/g, m, idx = {};
+    while ((m = re.exec(s))) {
+      idx[+m[1]] = m.index;
+      var st = s.indexOf('stream', m.index + m[0].length), eo = s.indexOf('endobj', m.index + m[0].length);
+      if (st >= 0 && (eo < 0 || st < eo)) { var es = s.indexOf('endstream', st + 6); if (es > 0) re.lastIndex = es + 9; }
+    }
+    doc.scan = idx;
+    return idx;
+  }
+  function pdfFetch(doc, num) {
+    if (Object.prototype.hasOwnProperty.call(doc.cache, num)) return doc.cache[num];
+    doc.cache[num] = null;
+    var off = doc.xref[num], v;
+    if (off == null || !new RegExp('^[\\0\\t\\n\\f\\r ]*' + num + '[\\0\\t\\n\\f\\r ]+\\d+[\\0\\t\\n\\f\\r ]+obj').test(doc.s.substr(off, 40))) off = pdfScan(doc)[num];
+    v = off != null ? pdfObjAt(doc, off) : pdfFromObjStm(doc, num);
+    doc.cache[num] = v === undefined ? null : v;
+    return doc.cache[num];
+  }
+  function pdfFromObjStm(doc, num) {
+    if (!doc.os) {
+      var os = {}, idx = pdfScan(doc);
+      Object.keys(idx).forEach(function (n) {
+        var st = pdfObjAt(doc, idx[n]);
+        if (!st || !st.$stream || st.dict.Type !== '/ObjStm') return;
+        var data = latin1(pdfStreamBytes(doc, st)), first = pdfResolve(doc, st.dict.First) || 0, lx = pdfLexer(data, 0), pairs = [];
+        for (var i = 0; i < (pdfResolve(doc, st.dict.N) || 0); i++) pairs.push([lx.next(), lx.next()]);
+        pairs.forEach(function (pr) { if (typeof pr[0] === 'number' && !(pr[0] in os)) os[pr[0]] = pdfValue(pdfLexer(data, first + pr[1])); });
+      });
+      doc.os = os;
+    }
+    return doc.os[num];
+  }
+  function pdfStreamBytes(doc, st) {
+    var raw = doc.b.subarray(st.start, st.end), f = pdfResolve(doc, st.dict.Filter);
+    if (f && !Array.isArray(f)) f = [f];
+    if (!f || !f.length) return raw;
+    f = f.map(function (x) { return String(pdfResolve(doc, x)); });
+    if (f.length > 1 || (f[0] !== '/FlateDecode' && f[0] !== '/Fl')) throw pdfStop('PDF unreadable', 'Packed with ' + f.join(', ').replace(/\//g, ''));
+    var parms = pdfResolve(doc, st.dict.DecodeParms);
+    if (Array.isArray(parms)) parms = pdfResolve(doc, parms[0]);
+    if (parms && pdfResolve(doc, parms.Predictor) > 1) throw pdfStop('PDF unreadable', 'Packed with a predictor');
+    var got = doc.decoded[st.start];
+    if (got === undefined) { doc.wanted[st.start] = raw; throw PDF_NEED; }
+    if (got === null) throw pdfStop('PDF unreadable', 'Damaged stream');
+    return got;
+  }
+  function pdfInflate(raw) {
+    function one(b) { return new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer().then(function (buf) { return new Uint8Array(buf); }); }
+    var n = raw.length;
+    while (n > 0 && (raw[n - 1] === 10 || raw[n - 1] === 13)) n--;
+    return one(raw).catch(function (e) { if (n < raw.length) return one(raw.subarray(0, n)); throw e; });
+  }
+  function pdfXref(doc) {
+    if (doc.trailers) return;
+    var s = doc.s, at = s.lastIndexOf('startxref'), seen = {}, m = at >= 0 ? /^\s*(\d+)/.exec(s.substr(at + 9, 30)) : null, off = m ? +m[1] : -1, trailers = [];
+    doc.xref = {};
+    while (off >= 0 && !seen[off] && s.substr(off, 4) === 'xref') {
+      seen[off] = true;
+      var lx = pdfLexer(s, off + 4), t = lx.next();
+      while (typeof t === 'number') {
+        var first = t, count = lx.next();
+        for (var i = 0; i < count; i++) { var o = lx.next(); lx.next(); if (lx.next() === 'n' && !((first + i) in doc.xref)) doc.xref[first + i] = o; }
+        t = lx.next();
+      }
+      if (t !== 'trailer') break;
+      var tr = pdfValue(lx);
+      trailers.push(tr);
+      off = typeof tr.Prev === 'number' ? tr.Prev : -1;
+    }
+    if (!trailers.length) {
+      var ti = s.lastIndexOf('trailer');
+      if (ti >= 0) { var t2 = pdfValue(pdfLexer(s, ti + 7)); if (t2 && typeof t2 === 'object') trailers.push(t2); }
+    }
+    if (!trailers.length) {
+      var idx = pdfScan(doc);
+      Object.keys(idx).forEach(function (n) { var v = pdfObjAt(doc, idx[n]); if (v && v.$stream && v.dict.Type === '/XRef') trailers.push(v.dict); });
+    }
+    doc.trailers = trailers;
+  }
+  function pdfMul(a, b) { return [a[0] * b[0] + a[1] * b[2], a[0] * b[1] + a[1] * b[3], a[2] * b[0] + a[3] * b[2], a[2] * b[1] + a[3] * b[3], a[4] * b[0] + a[5] * b[2] + b[4], a[4] * b[1] + a[5] * b[3] + b[5]]; }
+  function pdfCMap(src) {
+    var map = {}, re = /begin(bfchar|bfrange)([\s\S]*?)end\1/g, m;
+    function code(t) { var s = t && t.$s || '', n = 0; for (var i = 0; i < s.length; i++) n = n * 256 + s.charCodeAt(i); return n; }
+    function uni(t, add) { var s = t && t.$s || '', out = ''; for (var i = 0; i + 1 < s.length; i += 2) out += String.fromCharCode(((s.charCodeAt(i) << 8) | s.charCodeAt(i + 1)) + (i + 2 >= s.length ? add || 0 : 0)); return out; }
+    while ((m = re.exec(src))) {
+      var lx = pdfLexer(m[2], 0), toks = [], t;
+      while ((t = lx.next()) !== null) toks.push(pdfValue(lx, t, true));
+      if (m[1] === 'bfchar') { for (var i = 0; i + 1 < toks.length; i += 2) map[code(toks[i])] = uni(toks[i + 1]); continue; }
+      for (var j = 0; j + 2 < toks.length; j += 3) {
+        var lo = code(toks[j]), hi = code(toks[j + 1]), dst = toks[j + 2];
+        for (var c = lo; c <= hi && c - lo < 65536; c++) map[c] = Array.isArray(dst) ? uni(dst[c - lo]) : uni(dst, c - lo);
+      }
+    }
+    return map;
+  }
+  function pdfFont(doc, ref) {
+    var key = ref && ref.$r !== undefined ? ref.$r : null;
+    if (key !== null && doc.fonts[key]) return doc.fonts[key];
+    var d = pdfResolve(doc, ref);
+    if (!d || typeof d !== 'object') return null;
+    var f = { two: d.Subtype === '/Type0', widths: {}, dw: 500, fm: 0.001, exact: false, win: false, uni: null, barcode: false };
+    if (f.two) {
+      var desc = pdfResolve(doc, (pdfResolve(doc, d.DescendantFonts) || [])[0]) || {}, W = pdfResolve(doc, desc.W), dw = pdfResolve(doc, desc.DW);
+      if (typeof dw === 'number') f.dw = dw;
+      if (Array.isArray(W)) {
+        f.exact = true;
+        for (var i = 0; i + 1 < W.length;) {
+          var c0 = pdfResolve(doc, W[i]), nx = pdfResolve(doc, W[i + 1]);
+          if (typeof c0 !== 'number') break;
+          if (Array.isArray(nx)) { for (var k = 0; k < nx.length; k++) f.widths[c0 + k] = pdfResolve(doc, nx[k]); i += 2; }
+          else { for (var k2 = c0; k2 <= nx && k2 - c0 < 65536; k2++) f.widths[k2] = pdfResolve(doc, W[i + 2]); i += 3; }
+        }
+      }
+    } else {
+      var ws = pdfResolve(doc, d.Widths), first = pdfResolve(doc, d.FirstChar) || 0, fd = pdfResolve(doc, d.FontDescriptor), enc = pdfResolve(doc, d.Encoding);
+      if (Array.isArray(ws)) { f.exact = true; ws.forEach(function (w, n) { f.widths[first + n] = pdfResolve(doc, w); }); }
+      if (fd && typeof pdfResolve(doc, fd.MissingWidth) === 'number') f.dw = pdfResolve(doc, fd.MissingWidth);
+      if (d.Subtype === '/Type3' && Array.isArray(pdfResolve(doc, d.FontMatrix))) f.fm = pdfResolve(doc, d.FontMatrix)[0];
+      if (enc && typeof enc === 'object') enc = pdfResolve(doc, enc.BaseEncoding);
+      f.win = enc === '/WinAnsiEncoding';
+    }
+    var tu = pdfResolve(doc, d.ToUnicode);
+    if (tu && tu.$stream) {
+      f.uni = pdfCMap(latin1(pdfStreamBytes(doc, tu)));
+      var all = Object.keys(f.uni).map(function (c) { return f.uni[c]; }).join('');
+      f.barcode = all.indexOf('ù') >= 0 && all.indexOf('Ö') >= 0;
+    }
+    if (key !== null) doc.fonts[key] = f;
+    return f;
+  }
+  function pdfRuns(doc, src, res, ctm, out, counts, depth) {
+    var lx = pdfLexer(src, 0), ops = [], gs = { ctm: ctm, font: null, size: 0, tc: 0, tw: 0, th: 1, tl: 0, rise: 0 }, stack = [], tm = PDF_ID, tlm = PDF_ID, t;
+    var fonts = pdfResolve(doc, res.Font) || {}, xobjects = pdfResolve(doc, res.XObject) || {};
+    function num(i) { var v = ops[ops.length - i]; return typeof v === 'number' ? v : 0; }
+    function six() { return [num(6), num(5), num(4), num(3), num(2), num(1)]; }
+    function moveTo(tx, ty) { tlm = pdfMul([1, 0, 0, 1, tx, ty], tlm); tm = tlm; }
+    function advance(tx) { tm = [tm[0], tm[1], tm[2], tm[3], tm[4] + tx * tm[0], tm[5] + tx * tm[1]]; }
+    function startRun() { var m = pdfMul(tm, gs.ctm); return { x: m[4] + gs.rise * m[2], y: m[5] + gs.rise * m[3], size: Math.abs(gs.size) * Math.sqrt(m[2] * m[2] + m[3] * m[3]), text: '', exact: !!(gs.font && gs.font.exact), skip: !gs.font || gs.font.barcode }; }
+    function endRun(run) { var m = pdfMul(tm, gs.ctm); run.x2 = m[4] + gs.rise * m[2]; if (!run.skip && /\S/.test(run.text)) out.push(run); }
+    function glyphs(run, str) {
+      var f = gs.font; if (!f || !str || str.$s === undefined) return;
+      str = str.$s;
+      for (var i = 0; i + (f.two ? 1 : 0) < str.length; i += f.two ? 2 : 1) {
+        var code = f.two ? (str.charCodeAt(i) << 8) | str.charCodeAt(i + 1) : str.charCodeAt(i);
+        var ch = f.uni && f.uni[code] != null ? f.uni[code] : f.two ? null : code >= 32 && code < 127 ? String.fromCharCode(code) : f.win && code >= 160 ? String.fromCharCode(code) : code === 9 || code === 10 || code === 13 ? ' ' : null;
+        if (!run.skip) { counts.all++; if (ch === null) { counts.unknown++; ch = '?'; } run.text += ch; }
+        var w = f.widths[code] != null ? f.widths[code] : f.dw;
+        advance((w * f.fm * gs.size + gs.tc + (!f.two && code === 32 ? gs.tw : 0)) * gs.th);
+      }
+    }
+    function show(str) { var run = startRun(); glyphs(run, str); endRun(run); }
+    while ((t = lx.next()) !== null) {
+      if (typeof t === 'number' || t === '[' || t === '<<' || (typeof t === 'object') || (typeof t === 'string' && t.charAt(0) === '/')) { ops.push(pdfValue(lx, t, true)); continue; }
+      switch (t) {
+        case 'q': stack.push({ ctm: gs.ctm, font: gs.font, size: gs.size, tc: gs.tc, tw: gs.tw, th: gs.th, tl: gs.tl, rise: gs.rise }); break;
+        case 'Q': if (stack.length) gs = stack.pop(); break;
+        case 'cm': gs.ctm = pdfMul(six(), gs.ctm); break;
+        case 'BT': tm = tlm = PDF_ID; break;
+        case 'Tf': gs.font = pdfFont(doc, fonts[String(ops[ops.length - 2]).slice(1)]); gs.size = num(1); break;
+        case 'Tc': gs.tc = num(1); break;
+        case 'Tw': gs.tw = num(1); break;
+        case 'Tz': gs.th = num(1) / 100; break;
+        case 'TL': gs.tl = num(1); break;
+        case 'Ts': gs.rise = num(1); break;
+        case 'Td': moveTo(num(2), num(1)); break;
+        case 'TD': gs.tl = -num(1); moveTo(num(2), num(1)); break;
+        case 'Tm': tm = tlm = six(); break;
+        case 'T*': moveTo(0, -gs.tl); break;
+        case 'Tj': show(ops[ops.length - 1]); break;
+        case '\'': moveTo(0, -gs.tl); show(ops[ops.length - 1]); break;
+        case '"': gs.tw = num(3); gs.tc = num(2); moveTo(0, -gs.tl); show(ops[ops.length - 1]); break;
+        case 'TJ':
+          var run = startRun(), arr = ops[ops.length - 1];
+          (Array.isArray(arr) ? arr : []).forEach(function (e) {
+            if (typeof e !== 'number') { glyphs(run, e); return; }
+            if (e >= -200) { advance(-e / 1000 * gs.size * gs.th); return; }
+            endRun(run); advance(-e / 1000 * gs.size * gs.th); run = startRun();
+          });
+          endRun(run);
+          break;
+        case 'Do':
+          var xo = pdfResolve(doc, xobjects[String(ops[ops.length - 1]).slice(1)]);
+          if (xo && xo.$stream && xo.dict.Subtype === '/Form' && depth < 8) pdfRuns(doc, latin1(pdfStreamBytes(doc, xo)), pdfResolve(doc, xo.dict.Resources) || res, pdfMul(pdfResolve(doc, xo.dict.Matrix) || PDF_ID, gs.ctm), out, counts, depth + 1);
+          break;
+        case 'ID':
+          var e = src.indexOf('EI', lx.p);
+          while (e > 0 && !(pdfWs(src.charCodeAt(e - 1)) && (e + 2 >= src.length || pdfWs(src.charCodeAt(e + 2))))) e = src.indexOf('EI', e + 2);
+          lx.p = e < 0 ? src.length : e + 2;
+          break;
+      }
+      ops = [];
+    }
+  }
+  function pdfLines(runs) {
+    var lines = [];
+    runs.sort(function (a, b) { return b.y - a.y || a.x - b.x; }).forEach(function (r) {
+      var line = lines[lines.length - 1];
+      if (!line || line.y - r.y > Math.max(2, 0.4 * Math.min(line.size, r.size))) lines.push(line = { y: r.y, size: r.size, runs: [] });
+      line.runs.push(r);
+    });
+    return lines.map(function (line) {
+      var text = '', prev = null;
+      line.runs.sort(function (a, b) { return a.x - b.x; }).forEach(function (r) {
+        if (prev) {
+          var em = Math.max(1, Math.min(prev.size, r.size)), gap = r.x - prev.x2;
+          text += new Array((prev.exact && r.exact && gap < 0.15 * em ? 0 : Math.max(/\s$/.test(text) ? 0 : 1, Math.round(gap / (0.5 * em)))) + 1).join(' ');
+        }
+        text += r.text; prev = r;
+      });
+      return text.replace(/\s+$/, '');
+    }).join('\n');
+  }
+  function pdfRead(doc) {
+    if (doc.s.slice(0, 1024).indexOf('%PDF-') < 0) throw pdfStop('PDF unreadable', 'Not a PDF');
+    pdfXref(doc);
+    if (doc.trailers.some(function (tr) { return tr.Encrypt; })) throw pdfStop('PDF locked', 'Encrypted');
+    var rootRef = doc.trailers.map(function (tr) { return tr.Root; }).filter(Boolean)[0], root = pdfResolve(doc, rootRef);
+    if (!root || typeof root !== 'object') { var idx = pdfScan(doc); Object.keys(idx).some(function (n) { var v = pdfFetch(doc, +n); if (v && v.Type === '/Catalog') { root = v; return true; } return false; }); }
+    var pages = [], seen = {};
+    (function walk(ref, res, depth) {
+      var node = pdfResolve(doc, ref);
+      if (!node || typeof node !== 'object' || depth > 30) return;
+      if (ref && ref.$r !== undefined) { if (seen[ref.$r]) return; seen[ref.$r] = true; }
+      if (node.Resources !== undefined) res = node.Resources;
+      var kids = pdfResolve(doc, node.Kids);
+      if (Array.isArray(kids)) kids.forEach(function (k) { walk(k, res, depth + 1); });
+      else if (node.Type === '/Page' || node.Contents !== undefined) pages.push({ res: pdfResolve(doc, res) || {}, contents: node.Contents });
+    })(root && root.Pages, undefined, 0);
+    if (!pages.length) throw pdfStop('PDF unreadable', 'No page');
+    var counts = { all: 0, unknown: 0 };
+    var pageTexts = pages.map(function (pg) {
+      var c = pdfResolve(doc, pg.contents), parts = Array.isArray(c) ? c.map(function (x) { return pdfResolve(doc, x); }) : [c], runs = [];
+      pdfRuns(doc, parts.filter(function (x) { return x && x.$stream; }).map(function (x) { return latin1(pdfStreamBytes(doc, x)); }).join('\n'), pg.res, PDF_ID, runs, counts, 0);
+      return pdfLines(runs);
+    }), text = pageTexts.join('\n');
+    var problems = [];
+    if (!text.trim()) problems.push({ reason: 'No text', quote: pages.length === 1 ? 'A page with no words' : pages.length + ' pages with no words' });
+    else if (counts.unknown > counts.all / 20) problems.push({ reason: 'Unclear text', quote: counts.unknown + ' of ' + counts.all + ' letters unreadable' });
+    return { text: text, pages: pages.length, pageTexts: pageTexts, problems: problems };
+  }
+  function pdfText(bytes) {
+    var doc = { b: bytes, s: latin1(bytes), decoded: {}, wanted: {} }, rounds = 0;
+    function attempt() {
+      doc.cache = {}; doc.fonts = {}; doc.os = null;
+      try { return Promise.resolve(pdfRead(doc)); }
+      catch (e) {
+        if (e === PDF_NEED && rounds++ < 40) {
+          if (typeof DecompressionStream === 'undefined') return Promise.resolve({ text: '', pages: 0, problems: [{ reason: 'PDF unreadable', quote: 'This browser cannot unpack it' }] });
+          var keys = Object.keys(doc.wanted);
+          return Promise.all(keys.map(function (k) {
+            var raw = doc.wanted[k]; delete doc.wanted[k];
+            return pdfInflate(raw).then(function (out) { doc.decoded[k] = out; }, function () { doc.decoded[k] = null; });
+          })).then(attempt);
+        }
+        return Promise.resolve({ text: '', pages: 0, problems: [{ reason: e && e.stop || 'PDF unreadable', quote: e && e.stop ? e.quote : String(e && e.message || e) }] });
+      }
+    }
+    return attempt();
+  }
+
+  function grab(text, re, i) { var m = re.exec(text); return m ? (m[i == null ? 1 : i] || '').trim() : ''; }
+  function block(text, from, to) {
+    var a = from.exec(text); if (!a) return '';
+    var rest = text.slice(a.index + a[0].length), b = to.exec(rest);
+    if (b) rest = rest.slice(0, b.index);
+    return rest.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).join('\n');
+  }
+  function parseOrder(text, sourceName) {
+    var rec = {};
+    var known = /HAEMODIALYSIS CENTRE ORDER FORM/.test(text) && /^NAME[ \t]*:/m.test(text) && /NRIC[ \t]*:/.test(text) && /Order ID[ \t]*:/.test(text) && /REQUESTED DATE[ \t]*:/.test(text);
+    rec.layout_version = known ? '2026' : '';
+    rec.name = grab(text, /^NAME[ \t]*:[ \t]*(.*?)(?:[ \t]+NRIC[ \t]*:.*)?$/m);
+    rec.nric = grab(text, /NRIC[ \t]*:[ \t]*(\S+)/);
+    rec.sex = grab(text, /SEX[ \t]*:[ \t]*(\S+)/);
+    rec.birth_date = parseFormDate(grab(text, /BIRTH DATE[ \t]*:[ \t]*(\d{1,2} \w{3} \d{4})/));
+    rec.service = grab(text, /SERVICE[ \t]*:[ \t]*(.*)$/m);
+    rec.location = grab(text, /^LOCATION[ \t]*:[ \t]*(.*)$/m);
+    rec.requesting_doctor = grab(text, /Requesting Doctor[ \t]*:[ \t]*(.*?)(?:[ \t]+Order Date[ \t]*:.*)?$/m);
+    rec.consultant = grab(text, /Consultant-in-charge[ \t]*:[ \t]*(.*)$/m);
+    var od = grab(text, /Order Date[ \t]*:[ \t]*(.*)$/m), odt = /(\d{2}:\d{2}:\d{2})/.exec(od);
+    rec.ordered_on = parseFormDate(od) ? parseFormDate(od) + ' ' + (odt ? odt[1] : '00:00:00') : od;
+    rec.order_id = grab(text, /Order ID[ \t]*:[ \t]*(\S*?)(?:[ \t]+REQUESTED DATE[ \t]*:.*)?$/m);
+    rec.requested_date = parseFormDate(grab(text, /REQUESTED DATE[ \t]*:([^\n]*?)(?:1st Dialysis|$)/m));
+    rec.first_dialysis_date = parseFormDate(grab(text, /1st Dialysis \(this admission\)[ \t]*:[ \t]*(.*)$/m));
+    var heading = /^(Haemodialysis[^\n(]*?)[ \t]*(?:\n[ \t]*\*\*\*[^\n]*?\*\*\*[ \t]*(\([^\n]*\))[ \t]*)?$/m.exec(text);
+    rec.treatment = heading && heading[2] ? heading[1].trim() + ' ' + heading[2] : grab(text, /^(Haemodialysis.*)$/m);
+    rec.new_starter = !centreOf(segValue(formSections(text), 'Usual dialysis', 'Usual Dialysis Centre'));
+    rec.allergy = grab(text, /Allergy \(If any\)[ \t]*:[ \t]*(.*)$/m);
+    rec.priority = +grab(text, /Priority[ \t]*:[ \t]*(\d)/) || 0;
+    rec.priority_rule = grab(text, /Priority[ \t]*:[ \t]*\d[ \t]+(.*)$/m);
+    rec.length_hours = grab(text, /Length \(hrs\)[ \t]*:[ \t]*([\d:.]+)/);
+    rec.transport = grab(text, /Mode of Transport[ \t]*:[ \t]*(.*)$/m);
+    rec.access_ok = grab(text, /Functioning Vascular Access present\?[ \t]*:[ \t]*(\w+)/);
+    rec.virology = {
+      hiv: grab(text, /^HIV[ \t]*:[ \t]*(.*?)(?:[ \t]+HIV Case[ \t]*:.*)?$/m), hiv_case: grab(text, /HIV Case[ \t]*:[ \t]*(.*)$/m),
+      hbsag: grab(text, /^HepBsAg[ \t]*:[ \t]*(.*?)(?:[ \t]+HepB Case[ \t]*:.*)?$/m), hepb_case: grab(text, /HepB Case[ \t]*:[ \t]*(.*)$/m),
+      anti_hcv: grab(text, /^Anti-HCV[ \t]*:[ \t]*(.*?)(?:[ \t]+HepC Case[ \t]*:.*)?$/m), hepc_case: grab(text, /HepC Case[ \t]*:[ \t]*(.*)$/m),
+      hp: grab(text, /HP \(If any\)[ \t]*:[ \t]*(.*)$/m)
+    };
+    rec.remarks = block(text, /Additional Remarks[ \t]*\/[ \t]*Instructions[ \t]*:/, /Special Notes[ \t]*:|Scheduled Radiology Orders|Printed On[ \t]*:|\bPage[ \t]+\d+[ \t]+of[ \t]+\d+/);
+    rec.special_notes = block(text, /Special Notes[ \t]*:/, /Scheduled Radiology Orders|Printed On[ \t]*:|\bPage[ \t]+\d+[ \t]+of[ \t]+\d+/);
+    rec.radiology = [];
+    var rb = text.indexOf('Scheduled Radiology Orders');
+    if (rb >= 0) {
+      text.slice(rb).split('\n').forEach(function (l) {
+        var m = /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})\s+(.*?)\s{2,}(\S.*)$/.exec(l.trim());
+        if (m) rec.radiology.push({ date: m[3] + '-' + m[2] + '-' + m[1], time: m[4] + ':' + m[5], name: m[6].trim(), priority: m[7].trim() });
+      });
+    }
+    rec.accepted_at = null;
+    rec.source = { pdf: sourceName, imported_at: now(), layout_version: rec.layout_version, text: text };
+    return rec;
+  }
+
+  var REASONS = {
+    R01: ['Review new orders', 'This switch is on, so every new order waits here until a nurse presses Accept.'],
+    R02: ['Unknown centre', 'The Usual Dialysis Centre box matches none of the centre words in Settings.'],
+    R03: ['Matching rule', 'A matching rule sent this order for review.'],
+    R10: ['Unreadable file', 'This file is unreadable. Check the order, then Accept or Delete.'],
+    R11: ['Form not recognised', 'This page is not the order form. Check it, then Accept or Delete.'],
+    R12: ['No order number', 'The Order ID box is empty. Fill it in, then Accept.'],
+    R13: ['No name', 'The NAME box is empty. Fill it in, then Accept.'],
+    R14: ['No IC', 'The NRIC box is empty. Fill it in, then Accept.'],
+    R15: ['No location', 'The LOCATION box is empty. Off: the order goes on without a bed.'],
+    R16: ['No date', 'The REQUESTED DATE box is empty. Fill it in, then Accept.'],
+    R17: ['No priority', 'The Priority box is empty. Fill it in, then Accept.'],
+    R18: ['No vascular access', 'The form says no functioning vascular access is present. Off: the order goes on.'],
+    R19: ['Duplicate IC', 'Another order with this IC is on the board for the same day. Off: both go on.'],
+    R21: ['Two orders overdue', 'Another order for this patient is also overdue, so a nurse decides which one runs. Off: Auto slot may place both.']
+  };
+  var SWITCHED = ['R15', 'R18', 'R19', 'R21'];
+  function checkOn(code) { return state.settings.checks[code] !== false; }
+  function byCode(a, b) { return a.code < b.code ? -1 : a.code > b.code ? 1 : 0; }
+  function codesOf(t) { var c = []; (t.reasons || []).forEach(function (r) { if (c.indexOf(r.code) < 0) c.push(r.code); }); return c; }
+  function shortCodes(codes) { return codes.length > 2 ? codes.slice(0, 2).join(' ') + ' …' : codes.join(' '); }
+  function codeTitles(codes) { return codes.map(function (c) { return c + ' ' + REASONS[c][0]; }).join(', '); }
+
+  var CENTRE_WORDS = ['NKF', 'NATIONAL KIDNEY FOUNDATION', 'FRESENIUS', 'DAVITA', 'DIAVERUM', 'RHS', 'HOPE DIALYSIS', 'MAEDA', 'RENAL LIFE', 'IMMANUEL', 'ASIA KIDNEY', 'KDF', 'KIDNEY DIALYSIS FOUNDATION', 'KIDNEYCARE', 'ACER DIALYSIS', 'IHSAN', 'ACE DIALYSIS', 'AEGIS', 'THYE HUA KWAN', 'FIRSTLINE', 'RENAL DIALYSIS CENTRE', 'RENAL HEALTH', 'RENALTEAM', 'SATA', 'TAL DIALYSIS', 'TZU CHI'];
+  function centreOf(box) {
+    box = String(box || '');
+    var hit = state.settings.centres.some(function (w) { return new RegExp('(^|[^A-Z0-9])' + escRe(w) + '(?![A-Z0-9])', 'i').test(box); });
+    return hit ? box.split('|')[0].trim() : '';
+  }
+
+  var FIXED_BOXES = ['Any box', 'Remarks and notes'];
+  var FORM_BOXES = [
+    ['Patient', ['Name', 'NRIC', 'Birth date', 'Sex', 'Race', 'Address', 'Account', 'Class', 'Service', 'Location']],
+    ['This order', ['Requesting doctor', 'Consultant-in-charge', 'Order ID', 'Order date', 'Requested date', '1st dialysis (this admission)', 'Treatment', 'Priority', 'Schedule', 'Length (hrs)', 'Mode of transport', 'Allergy (if any)']],
+    ['Usual dialysis', ['Usual dialysis centre', 'Dialysis type', 'Dialysis days', 'Session time (hrs)', 'Dry weight (kg)', 'QB (ml/min)', 'QD (ml/min)', 'Anticoag', 'Repl flow site']],
+    ['Access', ['Functioning vascular access present?', 'Access side', 'Type of vascular access to be used', 'Buttonhole', 'Access site', 'Transonic flow', 'Filter', 'Tego needleless connector - date of change', 'Tego needleless connector - due']],
+    ['Heparin and fluid', ['Allergic to heparin?', 'Heparin', 'Dry weight (kg)', 'Ultrafiltration (L)', 'Heparin initial (units)', 'Heparin hourly (units)']],
+    ['Virology', ['HIV', 'HIV case', 'HepBsAg', 'HepB case', 'Anti-HCV', 'HepC case', 'HP (if any)']],
+    ['Dialysate', ['QB (ml/min)', 'Type of dialysate', 'Fixed NA+ conc (mmol/L)', 'QD (ml/min)', 'Dialysate temperature']],
+    ['Remarks and notes', ['Additional remarks / instructions', 'Special notes', 'Diabetic', 'RDC', 'Scheduled radiology orders']]
+  ];
+  var BOX_REC = {
+    'Patient/Name': 'name', 'Patient/NRIC': 'nric', 'Patient/Birth date': 'birth_date', 'Patient/Sex': 'sex', 'Patient/Service': 'service', 'Patient/Location': 'location',
+    'This order/Requesting doctor': 'requesting_doctor', 'This order/Consultant-in-charge': 'consultant', 'This order/Order ID': 'order_id', 'This order/Order date': 'ordered_on', 'This order/Requested date': 'requested_date',
+    'This order/1st dialysis (this admission)': 'first_dialysis_date', 'This order/Treatment': 'treatment', 'This order/Length (hrs)': 'length_hours', 'This order/Mode of transport': 'transport', 'This order/Allergy (if any)': 'allergy',
+    'Access/Functioning vascular access present?': 'access_ok', 'Remarks and notes/Additional remarks / instructions': 'remarks', 'Remarks and notes/Special notes': 'special_notes'
+  };
+  var BOX_VIROLOGY = { 'Virology/HIV': 'hiv', 'Virology/HIV case': 'hiv_case', 'Virology/HepBsAg': 'hbsag', 'Virology/HepB case': 'hepb_case', 'Virology/Anti-HCV': 'anti_hcv', 'Virology/HepC case': 'hepc_case', 'Virology/HP (if any)': 'hp' };
+  var HP = 'Virology/HP (if any)', HEPB = 'Virology/HepB case', HBSAG = 'Virology/HepBsAg', CENTRE_BOX = 'Usual dialysis/Usual dialysis centre';
+  function boxName(v) { return v.slice(v.indexOf('/') + 1); }
+  function validBox(v) { return FIXED_BOXES.indexOf(v) >= 0 || FORM_BOXES.some(function (g) { return g[1].some(function (b) { return g[0] + '/' + b === v; }); }); }
+  function labelKey(s) { return String(s).toLowerCase().replace(/\s+/g, ''); }
+  function segValue(segs, title, label) {
+    var s = segs.filter(function (x) { return x.title === title; })[0], k = labelKey(label);
+    var r = s && s.rows.filter(function (x) { return x.label != null && labelKey(x.label) === k; })[0];
+    return r ? r.value : '';
+  }
+  function segsOf(t) { var text = (t.rec.source && t.rec.source.text) || ''; if (t.segsText !== text) { t.segs = formSections(text); t.segsText = text; } return t.segs; }
+  function boxText(t, box) {
+    var r = t.rec;
+    if (box === 'Any box') return FORM_BOXES.map(function (g) { return g[1].map(function (b) { return boxText(t, g[0] + '/' + b); }).join('\n'); }).join('\n');
+    if (box === 'Remarks and notes') return (r.remarks || '') + '\n' + (r.special_notes || '');
+    if (BOX_REC[box]) return String(r[BOX_REC[box]] == null ? '' : r[BOX_REC[box]]);
+    if (BOX_VIROLOGY[box]) return (r.virology || {})[BOX_VIROLOGY[box]] || '';
+    if (box === 'This order/Priority') return r.priority ? r.priority + ' ' + (r.priority_rule || '') : '';
+    if (box === 'Remarks and notes/Scheduled radiology orders') return (r.radiology || []).map(function (x) { return x.name; }).join('\n');
+    return segValue(segsOf(t), box.slice(0, box.indexOf('/')), boxName(box));
+  }
+
+  function tokens(line) { return String(line).replace(/[^\p{L}\p{N}\s-]/gu, ' ').split(/\s+/).filter(function (w) { return /[\p{L}\p{N}]/u.test(w); }); }
+  function ruleHit(mode, chips, text) {
+    var lines = String(text || '').split('\n').map(tokens).filter(function (l) { return l.length; });
+    var cs = (chips || []).map(function (c) { return { chip: c, w: tokens(c).map(function (x) { return x.toLowerCase(); }) }; }).filter(function (c) { return c.w.length; });
+    if (!lines.length || !cs.length) return null;
+    var cover = lines.map(function (l) { return l.map(function () { return false; }); }), found = [], left = [];
+    cs.forEach(function (c) {
+      var n = c.w.length, any = false;
+      lines.forEach(function (l, li) {
+        for (var i = 0; i + n <= l.length; i++) {
+          var k = 0; while (k < n && l[i + k].toLowerCase() === c.w[k]) k++;
+          if (k === n) { any = true; for (k = 0; k < n; k++) cover[li][i + k] = true; }
+        }
+      });
+      if (any) found.push(c.chip);
+    });
+    lines.forEach(function (l, li) { l.forEach(function (w, i) { if (!cover[li][i]) left.push(w); }); });
+    var fires = mode === 'all of' ? found.length === cs.length : mode === 'none of' ? !found.length : mode === 'other than' ? left.length > 0 : found.length > 0;
+    return fires ? { found: found, left: left } : null;
+  }
+
+  var MODES = ['any of', 'all of', 'none of', 'other than'];
+  function tick(id, box, words, status, mode) { return { id: id, box: box, mode: mode || 'any of', words: words, status: status }; }
+  var MATCH_START = [
+    tick('m1', HP, ['MRSA'], 'mrsa'),
+    tick('m2', HP, ['VRE'], 'vre'),
+    tick('m3', HP, ['CP-CRE', 'CPCRE', 'CRE', 'CPE', 'carbapenem', 'carbapenemase', 'Carbapenem-resistant', 'carbapenemase-producing'], 'cpcre'),
+    tick('m4', HP, ['C diff', 'C. diff', 'C difficile', 'C. difficile', 'CDAD', 'Clostridium', 'Clostridioides'], 'cdiff'),
+    tick('m5', HEPB, ['Yes'], 'hepb'),
+    tick('m6', HEPB, ['Pending', 'Not Traced'], 'unknown'),
+    tick('m8', HBSAG, ['Not Traced'], 'unknown'),
+    tick('m7', HP, ['MRSA', 'VRE', 'CP-CRE', 'CPCRE', 'CRE', 'CPE', 'carbapenem', 'carbapenemase', 'Carbapenem-resistant', 'carbapenemase-producing', 'C diff', 'C. diff', 'C difficile', 'C. difficile', 'CDAD', 'Clostridium', 'Clostridioides', '(None)', 'and', 'or', 'positive', 'carrier', 'resistant', 'producing', 'Enterobacterales', 'screen', 'swab'], 'manual', 'other than')
+  ];
+  function matchRules(t) {
+    var st = [], found = [], problems = [];
+    state.settings.matching.forEach(function (r) {
+      var text = boxText(t, r.box), hit = ruleHit(r.mode, r.words, text), label = boxName(r.box);
+      if (!hit) return;
+      if (r.status === 'manual') { var q = label + ': ' + (r.mode === 'other than' ? hit.left.join(' ') : r.mode === 'none of' ? squeeze(text) : hit.found.join(', ')); problems.push({ code: 'R03', quote: q, rule: 'If ' + label + ' has ' + r.mode + ' the listed words' }); found.push('Manual review: ' + q); return; }
+      if (STATUSES.indexOf(r.status) < 0 || st.indexOf(r.status) >= 0) return;
+      st.push(r.status); found.push(BADGE[r.status] + ': ' + label);
+    });
+    st.sort(byStatus);
+    var v = t.rec.virology || {};
+    if (/Yes|Pending/i.test(v.hiv_case) || /Yes|Pending/i.test(v.hepc_case)) found.push('HIV/HepC: standard precautions, no tick');
+    return { statuses: st, found: found, problems: problems };
+  }
+
+  var PRIORITIES = ['Priority 1', 'Priority 2', 'Priority 3'];
+  var EARLIEST = 'the earliest slot possible';
+  function sessionsList() { var l = [EARLIEST]; for (var s = 1; s <= Math.max(5, state.sessions); s++) l.push('S' + s); return l; }
+  var SHAPES = [null,
+    ['Every order gets', 'points', 'when assigned to', 'session'],
+    ['A', 'priority', 'order gets', 'points', 'when assigned to', 'session'],
+    ['Every order gets', 'points', 'for each day waited when assigned to', 'session'],
+    ['An order whose', 'box', 'has', 'mode', 'words', 'gets', 'points', 'when assigned to', 'session']
+  ];
+  var BLANKS = { points: 'points', session: 'session', priority: 'priority', box: 'box', mode: 'any of', words: 'words' };
+  function rule(shape, points, session, more) { return Object.assign({ shape: shape, priority: PRIORITIES[0], box: FIXED_BOXES[1], mode: MODES[0], words: [], points: points, session: session }, more); }
+  var RULE_START = [
+    rule(1, '100', EARLIEST),
+    rule(2, '200', EARLIEST, { priority: 'Priority 1' }),
+    rule(2, '100', EARLIEST, { priority: 'Priority 2' }),
+    rule(3, '20', EARLIEST),
+    rule(4, '-1000', 'S1', { words: ['await TDC insertion', 'pending TDC insertion', 'await TDC', 'awaiting TDC'] }),
+    rule(4, '-1000', 'S1', { words: ['await angioplasty', 'awaiting angioplasty'] }),
+    rule(4, '10', EARLIEST, { words: ['aim for AM slot', 'AM slot', 'early'] })
+  ];
+  var CURVE = [100, 50, 33, 25, 20];
+  function pointsOf(r) { return Math.max(-9999, Math.min(9999, Math.trunc(Number(r.points)) || 0)); }
+  function sessionBoxes(r) {
+    var n = pointsOf(r), b = [], k = r.session === EARLIEST ? 0 : +String(r.session).slice(1);
+    if (!k) CURVE.forEach(function (c) { b.push(Math.trunc(n * c / 100)); });
+    else for (var s = 1; s <= k; s++) b.push(s === k ? n : 0);
+    return b;
+  }
+  var BOOKINGS = { scan: ['Scan booked after noon', [10, 5, 3, 2, 2]], line: ['Line booked in the morning', [-1000]] };
+  function allocRules(t, rad) {
+    var fired = [], found = [], w = waited(t);
+    state.settings.allocation.forEach(function (r) {
+      var n = 1, label = '', hit = null;
+      if (r.shape === 1) label = 'Every order';
+      else if (r.shape === 2) { if (r.priority !== 'Priority ' + t.priority) return; label = r.priority; }
+      else if (r.shape === 3) { n = w; if (!n) return; label = 'Waited ' + w + (w === 1 ? ' day' : ' days'); }
+      else {
+        hit = ruleHit(r.mode, r.words, boxText(t, r.box)); if (!hit) return;
+        label = boxName(r.box) + ': “' + (r.mode === 'other than' || r.mode === 'none of' ? hit.left.join(' ') : r.mode === 'all of' ? hit.found.join('”, “') : hit.found[0]) + '”';
+        found.push(label);
+      }
+      fired.push({ label: label, boxes: sessionBoxes(r).map(function (x) { return x * n; }) });
+    });
+    if (rad.pm.length) { fired.push({ label: BOOKINGS.scan[0], boxes: BOOKINGS.scan[1].slice() }); found.push(BOOKINGS.scan[0] + ': ' + rad.pm.join(', ')); }
+    if (rad.am.length) { fired.push({ label: BOOKINGS.line[0], boxes: BOOKINGS.line[1].slice() }); found.push(BOOKINGS.line[0] + ': ' + rad.am.join(', ') + ' (proposal)'); }
+    return { fired: fired, found: found };
+  }
+  function fixedChecks(rec) {
+    var p = ((rec.source && rec.source.problems) || []).map(function (x) { return { code: 'R10', quote: x.reason + (x.quote ? ': ' + x.quote : '') }; });
+    if (p.length && !rec.source.text) return p;
+    if (!rec.layout_version && rec.source && rec.source.pdf !== 'typed') p.push({ code: 'R11', quote: '' });
+    if (!rec.order_id) p.push({ code: 'R12', quote: '' });
+    if (!rec.name) p.push({ code: 'R13', quote: '' });
+    if (!rec.nric) p.push({ code: 'R14', quote: '' });
+    if (!rec.location && checkOn('R15')) p.push({ code: 'R15', quote: '' });
+    if (!rec.requested_date) p.push({ code: 'R16', quote: '' });
+    if (!rec.priority) p.push({ code: 'R17', quote: '' });
+    if (/^No$/i.test(rec.access_ok) && checkOn('R18')) p.push({ code: 'R18', quote: 'Functioning Vascular Access present?: No' });
+    return p;
+  }
+  function centreStop(t) {
+    if (!state.settings.review_centres) return [];
+    var box = squeeze(boxText(t, CENTRE_BOX));
+    return centreOf(box) ? [] : [{ code: 'R02', quote: box ? 'Usual Dialysis Centre: ' + box : 'Usual Dialysis Centre is empty' }];
+  }
+  function readRadiology(t) {
+    var pm = [], am = [], clash = [];
+    (t.radiology || []).forEach(function (r) {
+      if (r.date !== TODAY) return;
+      var short = r.name.replace(/\(.*?\)/g, '').replace(/,.*$/, '').trim() + ' ' + r.time;
+      if (r.time >= '12:00') pm.push(short);
+      else if (/\b(CVC|catheter|line|permcath|fistul\w*)\b/i.test(r.name)) am.push(short);
+      else clash.push('Clash: ' + short);
+    });
+    return { pm: pm, am: am, clash: clash };
+  }
+  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  function wordList(a) { return Array.isArray(a) ? a.map(function (w) { return String(w).trim(); }).filter(Boolean) : []; }
+  function cleanSettings(s) {
+    s = s || {};
+    var o = { review_centres: !!s.review_centres, checks: {} };
+    if (s.check_each === false) o.check_each = false;
+    SWITCHED.forEach(function (c) { o.checks[c] = !(s.checks && s.checks[c] === false); });
+    o.centres = Array.isArray(s.centres) ? wordList(s.centres) : clone(CENTRE_WORDS);
+    o.statuses = Array.isArray(s.statuses) ? s.statuses.filter(function (x) { return x && x.id; }).map(function (x) { return { id: String(x.id), name: String(x.name == null ? '' : x.name) }; }) : clone(STATUS_START);
+    var ids = o.statuses.map(function (x) { return x.id; });
+    o.matching = !Array.isArray(s.matching) ? clone(MATCH_START) : s.matching.filter(Boolean).map(function (r, i) {
+      return { id: String(r.id || 'r' + i), box: validBox(r.box) ? r.box : HP, mode: MODES.indexOf(r.mode) >= 0 ? r.mode : MODES[0], words: wordList(r.words), status: ids.indexOf(r.status) >= 0 ? r.status : 'manual' };
+    });
+    o.allocation = !Array.isArray(s.allocation) ? clone(RULE_START) : s.allocation.filter(function (r) { return r && SHAPES[r.shape]; }).map(function (r) {
+      return { shape: r.shape, priority: PRIORITIES.indexOf(r.priority) >= 0 ? r.priority : PRIORITIES[0], box: validBox(r.box) ? r.box : FIXED_BOXES[1], mode: MODES.indexOf(r.mode) >= 0 ? r.mode : MODES[0], words: wordList(r.words),
+        points: r.points == null || String(r.points).trim() === '' ? '' : String(pointsOf(r)), session: r.session === EARLIEST || /^S[1-9]\d*$/.test(r.session) ? r.session : EARLIEST };
+    });
+    return o;
+  }
+  function matchLine(r) { return 'If ' + boxName(r.box) + ' has ' + r.mode + ' ' + r.words.join(', ') + ' → ' + (r.status === 'manual' ? 'triggers manual review' : 'tick ' + (TICK[r.status] || r.status)); }
+  function ruleLine(r) { var v = { points: String(pointsOf(r)), session: r.session, priority: r.priority, box: boxName(r.box), mode: r.mode, words: r.words.join(', ') }; return SHAPES[r.shape].map(function (x) { return BLANKS[x] ? v[x] : x; }).join(' '); }
+
+  var tiles = {};
+  var tileN = 0;
+  var state = { sessions: 5, notDone: [], manual: [], bin: [], renaming: -1, settings: cleanSettings(null), doneOrders: [] };
+  var machines = [];
+  var held = {};
+
+  function hoursOf(s) { var m = /^(\d+):(\d{2})/.exec(s); return m ? +m[1] + +m[2] / 60 : parseFloat(s) || 0; }
+  function tileName(rec) { return rec.name || (rec.source && rec.source.stored || '').replace(/^.*\//, '') || 'No name'; }
+  function makeTile(rec) {
+    tileN += 1;
+    var id = 'o' + tileN;
+    var t = {
+      id: id, rec: rec,
+      name: tileName(rec), nric: rec.nric, bed: rec.location, date: rec.requested_date, ordered_on: rec.ordered_on,
+      priority: rec.priority, treatment: (rec.treatment || '').replace(/^Haemodialysis \((.+)\)$/, '$1') + (rec.length_hours ? ', ' + hoursOf(rec.length_hours) + ' h' : ''),
+      remarks: rec.remarks, special_notes: rec.special_notes, radiology: rec.radiology,
+      statuses: [], statusesFromForm: [], fired: [], found: [], fixedProblems: [], ruleProblems: [], reasons: [],
+      pinned: false, red: false, accepted: false, checkOnly: false, history: []
+    };
+    tiles[id] = t;
+    rerule(t, true);
+    return t;
+  }
+  function rerule(t, fresh) {
+    var rec = t.rec, unread = !!(rec.source && rec.source.problems && rec.source.problems.length && !rec.source.text);
+    rec.new_starter = !centreOf(boxText(t, CENTRE_BOX));
+    var ma = matchRules(t);
+    if (fresh) { t.statuses = ma.statuses.slice(); t.statusesFromForm = ma.statuses.slice(); t.history.push({ time: now(), field: 'statuses', from: null, to: ma.statuses.slice(), reason: 'read from the form' }); }
+    var rad = readRadiology(t), al = allocRules(t, rad);
+    t.fixedProblems = fixedChecks(rec);
+    t.ruleProblems = unread ? [] : centreStop(t).concat(ma.problems);
+    t.fired = al.fired;
+    t.found = ma.found.concat(al.found, rad.clash);
+    dupCheck();
+    refreshReason(t);
+  }
+  function dupCheck() {
+    var every = Object.keys(tiles), ids = every.filter(function (id) { return state.bin.indexOf(id) < 0; });
+    every.forEach(function (id) { tiles[id].fixedProblems = tiles[id].fixedProblems.filter(function (p) { return p.code !== 'R19' && p.code !== 'R21'; }); });
+    if (checkOn('R19')) ids.forEach(function (a) {
+      ids.forEach(function (b) {
+        if (a >= b) return;
+        var ta = tiles[a], tb = tiles[b];
+        if (!ta.nric || ta.nric !== tb.nric || !ta.date || ta.date !== tb.date) return;
+        ta.fixedProblems.push({ code: 'R19', quote: 'Same IC and date as ' + tb.name });
+        tb.fixedProblems.push({ code: 'R19', quote: 'Same IC and date as ' + ta.name });
+      });
+    });
+    if (checkOn('R21')) {
+      var seated = {};
+      machines.forEach(function (m) { m.cells.forEach(function (c) { if (c.tile) seated[c.tile] = true; }); });
+      var due = ids.filter(function (id) { var t = tiles[id]; return !seated[id] && t.nric && t.date && dayNum(t.date) <= dayNum(TODAY); });
+      due.forEach(function (a) {
+        var ta = tiles[a], also = due.filter(function (b) { return b !== a && tiles[b].nric === ta.nric && tiles[b].date !== ta.date; });
+        also.sort(function (x, y) { return dayNum(tiles[x].date) - dayNum(tiles[y].date) || x.slice(1) - y.slice(1); });
+        if (also.length) ta.fixedProblems.push({ code: 'R21', quote: 'Also overdue: ' + also.map(function (b) { return (tiles[b].rec.order_id || tiles[b].name) + ' for ' + fmt(tiles[b].date); }).join(', ') });
+      });
+    }
+    every.forEach(function (id) { refreshReason(tiles[id]); });
+  }
+  function refreshReason(t) {
+    var all = t.fixedProblems.concat(t.ruleProblems).sort(byCode);
+    t.problemCount = t.accepted ? 0 : all.length;
+    t.reasons = t.accepted ? [] : all.length ? all : t.checkOnly ? [{ code: 'R01', quote: 'Read it, then Accept' }] : [];
+    t.rec.problems = t.reasons.map(function (r) { return { code: r.code, quote: r.quote || '' }; });
+  }
+  function orderTaken(orderId, exceptId) {
+    return state.doneOrders.indexOf(orderId) >= 0 || Object.keys(tiles).some(function (id) { return id !== exceptId && tiles[id].rec.order_id && tiles[id].rec.order_id === orderId; });
+  }
+
+  function M(n, takes) {
+    var cells = [];
+    for (var s = 0; s < state.sessions; s++) cells.push({ tile: null, blocked: false, reason: '' });
+    machines.push({ name: 'M' + n, takes: takes.slice(), out: false, cells: cells });
+  }
+  function freshMachines() {
+    machines.length = 0;
+    M(1, ISO); M(2, ISO); M(3, MDRO); M(4, MDRO); M(5, MDRO);
+    M(6, []); M(7, []); M(8, []); M(9, []); M(10, []); M(11, []);
+    M(12, ['mrsa']); M(13, ['mrsa']); M(14, ['mrsa']); M(15, ['mrsa']);
+    M(16, ['unknown']); M(17, ['hepb']);
+  }
+
+  function locate(id) {
+    for (var mi = 0; mi < machines.length; mi++) {
+      var cells = machines[mi].cells;
+      for (var si = 0; si < cells.length; si++) if (cells[si].tile === id) return { m: mi, s: si };
+    }
+    return null;
+  }
+  function toNotDone(id) {
+    var t = tiles[id];
+    t.pinned = false; t.red = false;
+    if (state.notDone.indexOf(id) < 0) state.notDone.push(id);
+  }
+  function place(id, to, red, auto, note) {
+    var at = locate(id);
+    if (at) machines[at.m].cells[at.s].tile = null;
+    state.notDone = state.notDone.filter(function (x) { return x !== id; });
+    machines[to.m].cells[to.s].tile = id;
+    tiles[id].pinned = !auto;
+    tiles[id].red = !!red;
+    var slot = machines[to.m].name + ' S' + (to.s + 1);
+    var how = auto ? 'Auto slot' : (red ? 'by hand, red alert' : 'by hand');
+    tiles[id].history.push({ time: now(), field: 'placement', to: slot, reason: how + (note ? ': ' + note : '') });
+    changed('place', { tile: id, name: tiles[id].name, to: slot, how: how, note: note || '' });
+  }
+  function recheck() {
+    machines.forEach(function (m) {
+      m.cells.forEach(function (c) { if (c.tile) tiles[c.tile].red = fit(tiles[c.tile], m).state === 'hepb'; });
+    });
+  }
+
+  function machineCost(m) { return Math.min(5, rankOf(m)); }
+  function autoSlot() {
+    var who = state.notDone.filter(function (id) { return tiles[id].date && dayNum(tiles[id].date) <= dayNum(TODAY); });
+    who.sort(function (a, b) { return String(tiles[a].ordered_on).localeCompare(String(tiles[b].ordered_on)) || a.slice(1) - b.slice(1); });
+    var seats = [];
+    machines.forEach(function (m, mi) { m.cells.forEach(function (c, s) { if (!c.blocked && !c.tile) seats.push({ m: mi, s: s }); }); });
+    seats.sort(function (a, b) { return a.s - b.s || rankOf(machines[a.m]) - rankOf(machines[b.m]) || a.m - b.m; });
+    var P = who.length, S = seats.length;
+    if (!P || !S) return 0;
+    var K = 1 + S * P * (P + 1) / 2, cost = [];
+    who.forEach(function (id, i) {
+      var t = tiles[id], cl = cellsOf(t), row = [];
+      seats.forEach(function (st, j) {
+        var m = machines[st.m], w = 2 * (cl[st.s] - machineCost(m));
+        row.push(fit(t, m).state === 'ok' && w >= 0 ? -(w * K + (P - i) * (S - j)) : 1);
+      });
+      for (var k = 0; k < P; k++) row.push(0);
+      cost.push(row);
+    });
+    var col = hungarian(cost), placed = 0;
+    who.forEach(function (id, i) { if (col[i] < S) { place(id, seats[col[i]], false, true); placed++; } });
+    return placed;
+  }
+  function autoNote(placed) {
+    var later = 0, noSeat = 0, manual = state.manual.length, parts = [];
+    state.notDone.forEach(function (id) { var d = tiles[id].date; if (d && dayNum(d) > dayNum(TODAY)) later++; else if (d) noSeat++; });
+    if (placed) parts.push(placed + ' placed');
+    if (later) parts.push(later + (later === 1 ? ' waits' : ' wait') + ' for a later day');
+    if (manual) parts.push(manual + (manual === 1 ? ' needs' : ' need') + ' manual review');
+    if (noSeat) parts.push(noSeat + (noSeat === 1 ? ' has' : ' have') + ' no fitting seat');
+    return parts.join(', ') || 'Nothing to place';
+  }
+  function hungarian(a) {
+    var n = a.length, m = a[0].length, u = [], v = [], p = [], way = [], i, j;
+    for (i = 0; i <= n; i++) u[i] = 0;
+    for (j = 0; j <= m; j++) { v[j] = 0; p[j] = 0; way[j] = 0; }
+    for (i = 1; i <= n; i++) {
+      p[0] = i;
+      var j0 = 0, minv = [], used = [];
+      for (j = 0; j <= m; j++) { minv[j] = Infinity; used[j] = false; }
+      do {
+        used[j0] = true;
+        var i0 = p[j0], delta = Infinity, j1 = 0;
+        for (j = 1; j <= m; j++) {
+          if (used[j]) continue;
+          var cur = a[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+          if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+        }
+        for (j = 0; j <= m; j++) { if (used[j]) { u[p[j]] += delta; v[j] -= delta; } else minv[j] -= delta; }
+        j0 = j1;
+      } while (p[j0] !== 0);
+      do { var jp = way[j0]; p[j0] = p[jp]; j0 = jp; } while (j0);
+    }
+    var col = [];
+    for (j = 1; j <= m; j++) if (p[j]) col[p[j] - 1] = j - 1;
+    return col;
+  }
+
+  var TILE_KEYS = ['id', 'rec', 'name', 'nric', 'bed', 'date', 'ordered_on', 'priority', 'treatment', 'remarks', 'special_notes', 'radiology', 'statuses', 'statusesFromForm', 'pinned', 'red', 'accepted', 'checkOnly', 'history', 'binAt', 'binFrom'];
+  function tileData(t) { var o = {}; TILE_KEYS.forEach(function (k) { o[k] = t[k]; }); return o; }
+  function copyTile(t) { var o = tileData(t); o.score = score(t); return o; }
+  function snapshot() {
+    var ts = {};
+    Object.keys(tiles).forEach(function (id) { ts[id] = tileData(tiles[id]); });
+    return {
+      version: 1, saved_at: now(), day: TODAY, sessions: state.sessions, tileN: tileN, settings: state.settings, done_orders: state.doneOrders,
+      machines: machines.map(function (m) { return { name: m.name, takes: m.takes, out: m.out, cells: m.cells.map(function (c) { return { tile: c.tile, blocked: c.blocked, reason: c.reason }; }) }; }),
+      tiles: ts, notDone: state.notDone, manual: state.manual, bin: state.bin
+    };
+  }
+  function clearTiles() { Object.keys(tiles).forEach(function (id) { delete tiles[id]; }); }
+  function freshState() {
+    TODAY = localDate(); state.sessions = 5; tileN = 0; state.renaming = -1;
+    state.settings = cleanSettings(null); state.doneOrders = []; useStatuses(state.settings.statuses); held = {};
+    state.notDone = []; state.manual = []; state.bin = [];
+    clearTiles(); freshMachines(); resetDrafts();
+  }
+  function knownStatuses(list) { return (list || []).filter(function (s) { return STATUSES.indexOf(s) >= 0; }).sort(byStatus); }
+  function loadState(s) {
+    if (!s || s.version !== 1 || !Array.isArray(s.machines)) throw new Error('state.json is not a board this version understands');
+    TODAY = s.day || localDate(); state.sessions = s.sessions || 5; tileN = s.tileN || 0; state.renaming = -1;
+    state.settings = cleanSettings(s.settings); state.doneOrders = s.done_orders || []; useStatuses(state.settings.statuses); held = {};
+    state.notDone = s.notDone || []; state.manual = s.manual || []; state.bin = s.bin || [];
+    machines.length = 0;
+    s.machines.forEach(function (m) {
+      var cells = (m.cells || []).map(function (c) { return { tile: c.tile || null, blocked: !!c.blocked, reason: c.reason || '' }; });
+      while (cells.length < state.sessions) cells.push({ tile: null, blocked: !!m.out, reason: '' });
+      machines.push({ name: m.name, takes: knownStatuses(m.takes), out: !!m.out, cells: cells.slice(0, state.sessions) });
+    });
+    clearTiles();
+    Object.keys(s.tiles || {}).forEach(function (id) {
+      var o = s.tiles[id], t = { fired: [], found: [], fixedProblems: [], ruleProblems: [], reasons: [], problemCount: 0 };
+      TILE_KEYS.forEach(function (k) { t[k] = o[k]; });
+      t.id = id; t.rec = t.rec || {}; t.rec.source = t.rec.source || { pdf: 'typed', imported_at: '', layout_version: '', text: '' };
+      t.history = t.history || []; t.statuses = knownStatuses(t.statuses); t.statusesFromForm = t.statusesFromForm || []; t.radiology = t.radiology || [];
+      tiles[id] = t;
+    });
+    var live = {};
+    machines.forEach(function (m) { m.cells.forEach(function (c) { if (c.tile && !tiles[c.tile]) c.tile = null; if (c.tile) live[c.tile] = true; }); });
+    state.notDone = state.notDone.filter(function (id) { return tiles[id] && !live[id]; }); state.notDone.forEach(function (id) { live[id] = true; });
+    state.manual = state.manual.filter(function (id) { return tiles[id] && !live[id]; }); state.manual.forEach(function (id) { live[id] = true; });
+    state.bin = state.bin.filter(function (id) { return tiles[id] && !live[id]; }); state.bin.forEach(function (id) { live[id] = true; });
+    Object.keys(tiles).forEach(function (id) { if (!live[id]) state.notDone.push(id); });
+    Object.keys(tiles).forEach(function (id) { rerule(tiles[id], false); });
+    sweepToManual();
+    recheck(); resetDrafts();
+  }
+  function buildCopy(reason) {
+    var board = [];
+    machines.forEach(function (m) { m.cells.forEach(function (c, s) { if (c.tile) board.push({ machine: m.name, session: s + 1, tile: copyTile(tiles[c.tile]) }); }); });
+    var rows = machines.map(function (m) {
+      return m.name + ': ' + m.cells.map(function (c) { return c.tile ? tiles[c.tile].name + (tiles[c.tile].red ? '*' : '') : (c.blocked ? 'x' : '.'); }).join(' | ');
+    });
+    var tag = reason.toLowerCase().replace(/\s+/g, '-');
+    return {
+      name: 'plan-' + TODAY + '_' + fileStamp().slice(11) + '-' + tag, when: now(), reason: reason, day: TODAY, sessions: state.sessions,
+      rows: rows, board: board,
+      not_done: state.notDone.map(function (id) { return copyTile(tiles[id]); }), manual: state.manual.map(function (id) { return copyTile(tiles[id]); })
+    };
+  }
+  function newDay(copyName) {
+    var done = [];
+    machines.forEach(function (m) { m.cells.forEach(function (c) { if (c.tile) { var dt = tiles[c.tile]; done.push(dt.name); if (dt.rec.order_id) state.doneOrders.push(dt.rec.order_id); delete tiles[c.tile]; c.tile = null; } }); });
+    var binned = state.bin.map(function (id) { return tiles[id]; });
+    state.bin = [];
+    binned.forEach(function (t) { delete tiles[t.id]; delete held[t.id]; removeStored(t); });
+    if (binned.length) changed('empty_bin', { orders: binned.length, names: binned.map(function (t) { return t.name; }), stored: binned.map(function (t) { return t.rec.source.stored || ''; }).filter(Boolean) });
+    var from = TODAY, next = addDays(TODAY, 1), mac = localDate();
+    TODAY = dayNum(mac) > dayNum(next) ? mac : next;
+    state.notDone.concat(state.manual).forEach(function (id) { tiles[id].history.push({ time: now(), field: 'carried', to: TODAY }); });
+    Object.keys(tiles).forEach(function (id) { rerule(tiles[id], false); });
+    var stopped = state.notDone.filter(function (id) { return tiles[id].problemCount; }).map(function (id) { var t = tiles[id]; return { tile: id, name: t.name, order: t.rec.order_id, codes: codesOf(t).join(' ') }; });
+    sweepToManual();
+    changed('new_day', { from: from, to: TODAY, done: done, copy: copyName || '', stopped: stopped });
+    return done.length;
+  }
+
+  var store = { dir: null, orders: null, off: false, queue: [], timer: 0, inFlight: 0, chain: Promise.resolve(), status: 'none', error: '', lastSaved: '', onStatus: null };
+  function idb(mode, fn) {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open('dialysis-allocator', 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore('kv'); };
+      r.onerror = function () { rej(r.error); };
+      r.onsuccess = function () {
+        var db = r.result, tx = db.transaction('kv', mode), q = fn(tx.objectStore('kv'));
+        tx.oncomplete = function () { db.close(); res(q && q.result); };
+        tx.onerror = function () { db.close(); rej(tx.error); };
+      };
+    });
+  }
+  function idbGet(k) { return idb('readonly', function (s) { return s.get(k); }).catch(function () { return null; }); }
+  function idbPut(k, v) { return idb('readwrite', function (s) { return s.put(v, k); }).catch(function () { }); }
+  var handles = { get: idbGet, put: idbPut };
+  function readText(dir, name) {
+    return dir.getFileHandle(name).then(function (fh) { return fh.getFile(); }).then(function (f) { return f.text(); })
+      .catch(function (e) { if (e && e.name === 'NotFoundError') return null; throw e; });
+  }
+  function writeText(dir, name, text) {
+    return dir.getFileHandle(name, { create: true }).then(function (fh) { return fh.createWritable(); })
+      .then(function (w) { return w.write(text).then(function () { return w.close(); }); });
+  }
+  function appendText(dir, name, text) {
+    return dir.getFileHandle(name, { create: true }).then(function (fh) {
+      return fh.getFile().then(function (f) {
+        return fh.createWritable({ keepExistingData: true }).then(function (w) { return w.seek(f.size).then(function () { return w.write(text); }).then(function () { return w.close(); }); });
+      });
+    });
+  }
+  function setStatus(s, err) {
+    store.status = s; store.error = err ? String(err && err.message || err) : '';
+    if (s === 'saved') store.lastSaved = now().slice(11, 16);
+    if (store.onStatus) store.onStatus();
+  }
+  function changed(event, details) {
+    var line = { t: now(), event: event };
+    Object.keys(details || {}).forEach(function (k) { line[k] = details[k]; });
+    store.queue.push(JSON.stringify(line));
+    if (store.off || !store.dir) { setStatus(store.off ? 'off' : 'none'); return; }
+    clearTimeout(store.timer); store.timer = setTimeout(flush, 300);
+  }
+  function flush() {
+    clearTimeout(store.timer); store.timer = 0;
+    if (!store.dir || store.off) return store.chain;
+    var dir = store.dir, lines = [];
+    store.inFlight += 1;
+    store.chain = store.chain.then(function () {
+      lines = store.queue.splice(0);
+      var snap = JSON.stringify(snapshot(), null, 1);
+      setStatus('saving');
+      return writeText(dir, 'state.json', snap);
+    }).then(function () {
+      if (lines.length) return appendText(dir, 'log.jsonl', lines.join('\n') + '\n');
+    }).then(function () { store.inFlight -= 1; setStatus('saved'); }, function (e) { store.inFlight -= 1; store.queue = lines.concat(store.queue); setStatus('error', e); });
+    return store.chain;
+  }
+  function pending() { return !!(store.dir && !store.off && (store.queue.length || store.timer || store.inFlight)); }
+  function writeCopy(copy) {
+    if (!store.dir || store.off) return Promise.resolve('');
+    return store.dir.getDirectoryHandle('copies', { create: true }).then(function (sub) { return writeText(sub, copy.name + '.json', JSON.stringify(copy, null, 1)); }).then(function () { return copy.name; });
+  }
+  function connect(dir) {
+    return (pending() ? flush() : store.chain).then(function () {
+      return dir.getDirectoryHandle('copies', { create: true });
+    }).then(function () { return dir.getDirectoryHandle('orders', { create: true });
+    }).then(function () { return readText(dir, 'state.json'); }).then(function (text) {
+      if (text !== null) {
+        var s = JSON.parse(text), keep = JSON.parse(JSON.stringify(snapshot()));
+        try { loadState(s); } catch (e) { loadState(keep); throw e; }
+        store.queue = [];
+      }
+      store.dir = dir; store.off = false;
+      handles.put('dir', dir);
+      changed('start', { folder: dir.name, day: TODAY, tiles: Object.keys(tiles).length });
+      return flush();
+    }).then(function () { if (store.status === 'error') throw new Error(store.error); });
+  }
+
+  var importing = null;
+  function listFiles(dir) {
+    var it = dir.values(), names = [];
+    function step() { return it.next().then(function (r) { if (r.done) return names.sort(); if (r.value.kind === 'file') names.push(r.value.name); return step(); }); }
+    return step();
+  }
+  function sameBytes(a, b) { if (a.length !== b.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; }
+  function sha256(bytes) {
+    if (!window.crypto || !crypto.subtle) return Promise.resolve('');
+    return crypto.subtle.digest('SHA-256', bytes).then(function (h) { return Array.prototype.map.call(new Uint8Array(h), function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join(''); });
+  }
+  function fileAway(inbox, name, bytes, base, keep) {
+    var ext = (/\.[^.]+$/.exec(name) || [''])[0].toLowerCase(), box = null, target = '';
+    return store.dir.getDirectoryHandle('storage', { create: true }).then(function (sub) {
+      box = sub;
+      function free(n) { var t = base + (n > 1 ? '-' + n : '') + ext; return sub.getFileHandle(t).then(function () { return free(n + 1); }, function (e) { if (e && e.name === 'NotFoundError') return t; throw e; }); }
+      return free(1);
+    }).then(function (t) {
+      target = t;
+      return box.getFileHandle(t, { create: true }).then(function (fh) { return fh.createWritable(); }).then(function (w) { return w.write(bytes).then(function () { return w.close(); }); });
+    }).then(function () { return box.getFileHandle(target); }).then(function (fh) { return fh.getFile(); }).then(function (f) { return f.arrayBuffer(); }).then(function (buf) {
+      if (!sameBytes(new Uint8Array(buf), bytes)) throw new Error('the copy in storage is not the same');
+      return keep ? null : inbox.removeEntry(name);
+    }).then(function () { return 'storage/' + target; });
+  }
+  function orderTexts(pages) {
+    var out = [];
+    pages.forEach(function (p) {
+      if (out.length && !/HAEMODIALYSIS CENTRE ORDER FORM/.test(p) && !/Order ID[ \t]*:/.test(p)) out[out.length - 1] += '\n' + p;
+      else out.push(p);
+    });
+    return out;
+  }
+  function txtPages(text) {
+    var pages = [], cur = [];
+    text.split('\n').forEach(function (l) { cur.push(l); if (/\bPage\s+\d+\s+of\s+\d+\s*$/.test(l)) { pages.push(cur.join('\n')); cur = []; } });
+    if (!pages.length) return [text];
+    if (cur.join('').trim()) pages.push(cur.join('\n')); else if (cur.length) pages[pages.length - 1] += '\n' + cur.join('\n');
+    return pages;
+  }
+  function importOne(inbox, name, res) {
+    var bytes;
+    return inbox.getFileHandle(name).then(function (fh) { return fh.getFile(); }).then(function (f) { return f.arrayBuffer(); }).then(function (buf) {
+      bytes = new Uint8Array(buf);
+      return Promise.all([/\.pdf$/i.test(name) ? pdfText(bytes) : { text: new TextDecoder().decode(bytes), pages: 1, problems: [] }, sha256(bytes)]);
+    }).then(function (r) {
+      var recs = orderTexts(r[0].pageTexts || (/\.pdf$/i.test(name) ? [r[0].text] : txtPages(r[0].text))).map(function (text) {
+        var rec = parseOrder(text, name);
+        rec.source.problems = r[0].problems.slice();
+        rec.source.sha256 = r[1];
+        return rec;
+      });
+      return recs.reduce(function (p, rec, i) {
+        return p.then(function () { return fileAway(inbox, name, bytes, (rec.order_id || name.replace(/\.[^.]+$/, '')).replace(/[^\w.-]/g, '_'), i < recs.length - 1); }).then(function (stored) { rec.source.stored = stored; });
+      }, Promise.resolve()).then(function () {
+        recs.forEach(function (rec) {
+          var stored = rec.source.stored;
+          if (rec.order_id && orderTaken(rec.order_id, null)) { res.refused.push(rec.order_id); changed('import_refused', { file: name, stored: stored, order: rec.order_id }); return; }
+          var t = makeTile(rec);
+          t.checkOnly = state.settings.check_each !== false;
+          refreshReason(t);
+          if (t.checkOnly || t.problemCount) state.manual.push(t.id); else toNotDone(t.id);
+          sweepToManual();
+          res.added.push(t.id);
+          changed('import', { file: name, stored: stored, tile: t.id, name: t.name, order: rec.order_id, date: t.date, where: t.reasons.length ? 'manual: ' + codesOf(t).join(' ') : 'not done' });
+        });
+      });
+    }).catch(function (e) { res.failed.push(name); changed('import_failed', { file: name, error: String(e && e.message || e) }); });
+  }
+  function ordersDir() {
+    var h = store.orders;
+    if (!h) return store.dir.getDirectoryHandle('orders', { create: true });
+    return h.queryPermission({ mode: 'readwrite' }).then(function (p) { return p === 'granted' ? p : h.requestPermission({ mode: 'readwrite' }); })
+      .then(function (p) { if (p !== 'granted') throw new Error('No access to ' + h.name); return h; });
+  }
+  function importOrders() {
+    if (importing) return importing;
+    var res = { added: [], refused: [], failed: [] };
+    if (!store.dir || store.off) return Promise.resolve(res);
+    importing = ordersDir().then(function (inbox) {
+      return listFiles(inbox).then(function (names) {
+        return names.filter(function (n) { return /\.(pdf|txt)$/i.test(n) && n.charAt(0) !== '.'; }).reduce(function (p, n) { return p.then(function () { return importOne(inbox, n, res); }); }, Promise.resolve());
+      });
+    }).catch(function (e) { res.error = String(e && e.message || e); res.failed.push(res.error); changed('import_failed', { folder: store.orders ? store.orders.name : 'orders', error: res.error }); }).then(function () { importing = null; return res; });
+    return importing;
+  }
+  function importNote(r) {
+    if (r.error) return r.error;
+    return [[r.added.length, ' imported'], [r.refused.length, ' already in'], [r.failed.length, ' not imported']].filter(function (x) { return x[0]; }).map(function (x) { return x[0] + x[1]; }).join(', ');
+  }
+
+  var ICON_PIN = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"></path><path d="M12 14v7"></path></svg>';
+  var ICON_ALERT = '<svg class="ic ic-alert" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5"></path><path d="M12 18v.5"></path></svg>';
+  var ICON_CARRIED = '<svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>';
+  var ICON_X = '<svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>';
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+
+  var grid = $('grid');
+  var notDonePool = $('notDonePool');
+  var menuEl = $('menu');
+  var toastEl = $('toast');
+
+  function takesChips(m) { return m.takes.length ? m.takes.map(function (s) { return '<span class="pill ' + badgeClass(s) + '">' + BADGE[s] + '</span>'; }).join('') : '<span class="pill p-clean">Clean</span>'; }
+  function purposePill(m) { return m.out ? '<span class="pill p-out">Out of service</span>' : takesChips(m); }
+  function badgeClass(s) { return s === 'hepb' ? 'b-hepb' : s === 'unknown' ? 'b-unknown' : s === 'isolation' ? 'b-iso' : 'b-contact'; }
+  function dateHtml(t) {
+    if (!t.date || t.date === TODAY) return '';
+    var over = dayNum(t.date) < dayNum(TODAY);
+    return '<span class="pill carried">' + (over ? ICON_CARRIED : '') + esc(fmt(t.date)) + '</span>';
+  }
+  function tagsHtml(t) { return t.statuses.map(function (s) { return '<span class="pill ' + badgeClass(s) + '">' + BADGE[s] + '</span>'; }).join('') + dateHtml(t); }
+  function tileHtml(t) {
+    var right = (t.red ? ICON_ALERT : '') + (t.pinned ? ICON_PIN : '');
+    var label = t.name + ', bed ' + t.bed + (t.statuses.length ? ', ' + t.statuses.map(function (s) { return BADGE[s]; }).join(', ') : '') +
+      (t.date && t.date !== TODAY ? ', for ' + fmt(t.date, 'day') : '') + (t.pinned ? ', placed by hand' : '') + (t.red ? ', red alert override' : '');
+    return '<button type="button" class="tile' + (t.red ? ' red' : '') + '" data-tile="' + t.id + '" aria-label="' + esc(label) + '">' +
+      '<span class="t-top"><span class="t-name">' + esc(t.name) + '</span><span class="t-bed">' + esc(t.bed) + '</span></span>' +
+      '<span class="t-tags">' + tagsHtml(t) + '<span class="t-right">' + right + '</span></span></button>';
+  }
+  function cellHtml(c, mi, si) {
+    var attrs = ' role="cell" data-m="' + mi + '" data-s="' + si + '"';
+    if (c.blocked) return '<div class="cell blocked"' + attrs + ' aria-label="Blocked">' + ICON_X + (c.reason ? '<span>' + esc(c.reason) + '</span>' : '') + '</div>';
+    if (c.tile) return '<div class="cell"' + attrs + '>' + tileHtml(tiles[c.tile]) + '</div>';
+    return '<div class="cell empty"' + attrs + ' aria-label="Empty"></div>';
+  }
+  function rowHeadHtml(m, mi) {
+    var name = state.renaming === mi ? '<input class="rename" id="renameInput" type="text" value="' + esc(m.name) + '" aria-label="Machine name">' : '<button type="button" class="mname" data-machine="' + mi + '" aria-label="' + esc(m.name) + ': change what it takes">' + esc(m.name) + '</button>';
+    return '<div class="rowhead" role="rowheader" data-m="' + mi + '">' + name + purposePill(m) + '</div>';
+  }
+  function ticksHtml(t, prefix) {
+    return STATUSES.map(function (s) {
+      var id = prefix + '-' + s;
+      return '<label class="tick" for="' + id + '"><input type="checkbox" id="' + id + '" data-status="' + s + '"' + (t.statuses.indexOf(s) >= 0 ? ' checked' : '') + '> ' + TICK[s] + '</label>';
+    }).join('');
+  }
+  function readTicks(box) { return STATUSES.filter(function (s) { var i = box.querySelector('[data-status="' + s + '"]'); return i && i.checked; }); }
+  function groupHtml(title, ids, cls) {
+    return '<section class="group"><h3 class="g-head' + (cls ? ' ' + cls : '') + '">' + esc(title) + ' <span class="count' + (cls ? ' warn' : '') + '">' + ids.length + '</span></h3><div class="pool-grid">' + ids.map(function (id) { return tileHtml(tiles[id]); }).join('') + '</div></section>';
+  }
+  function groupsHtml() {
+    var ids = state.notDone.slice().sort(function (a, b) { return score(tiles[b]) - score(tiles[a]); });
+    var over = [], today = [], later = {};
+    ids.forEach(function (id) {
+      var d = tiles[id].date ? dayNum(tiles[id].date) - dayNum(TODAY) : 0;
+      if (d < 0) over.push(id); else if (d === 0) today.push(id); else (later[tiles[id].date] = later[tiles[id].date] || []).push(id);
+    });
+    var h = over.length ? groupHtml('Overdue', over, 'overdue') : '';
+    h += groupHtml('Today', today, '');
+    Object.keys(later).sort().forEach(function (d) { h += groupHtml(fmt(d, 'day'), later[d], ''); });
+    return h;
+  }
+  function renderStatus() {
+    var el = $('saveState'), cls = 'pill pill-btn ', text, title = store.dir ? store.dir.name : '';
+    if (store.off) { cls += 'p-bad'; text = 'Not saving'; }
+    else if (!store.dir) { cls += 'p-bad'; text = 'No folder'; }
+    else if (store.status === 'error') { cls += 'p-bad'; text = 'Not saved'; title = store.error; }
+    else if (store.status === 'saving') { cls += 'p-clean'; text = 'Saving'; }
+    else { cls += 'p-saved'; text = store.dir.name + (store.lastSaved ? ' · Saved ' + store.lastSaved : ''); }
+    el.className = cls; el.textContent = text; el.title = title;
+  }
+  store.onStatus = renderStatus;
+  function render() {
+    $('dayLine').textContent = fmt(TODAY, 'full');
+    $('dayHint').hidden = dayNum(TODAY) >= dayNum(localDate());
+    renderStatus();
+    grid.style.setProperty('--sessions', String(state.sessions));
+    var h = '<div class="row" role="row"><div class="colhead" role="columnheader">Machine</div>';
+    for (var s = 0; s < state.sessions; s++) h += '<div class="colhead" role="columnheader" data-col="' + s + '">S' + (s + 1) + '</div>';
+    h += '</div>';
+    machines.forEach(function (m, mi) { h += '<div class="row" role="row">' + rowHeadHtml(m, mi); m.cells.forEach(function (c, si) { h += cellHtml(c, mi, si); }); h += '</div>'; });
+    grid.innerHTML = h;
+    $('manualCount').textContent = String(state.manual.length);
+    $('notDoneCount').textContent = String(state.notDone.length);
+    $('manualList').innerHTML = state.manual.map(function (id) {
+      var t = tiles[id];
+      return '<button type="button" class="mtile" data-manual="' + id + '"><span class="m-left"><span class="t-name">' + esc(t.name) + '</span><span class="t-bed">' + esc(t.bed) + '</span>' + dateHtml(t) + '</span><span class="m-reason" title="' + esc(codeTitles(codesOf(t))) + '">' + esc(shortCodes(codesOf(t))) + '</span></button>';
+    }).join('');
+    $('notDoneGroups').innerHTML = groupsHtml();
+    $('binCount').textContent = String(state.bin.length);
+    $('binList').innerHTML = state.bin.map(function (id) {
+      var t = tiles[id];
+      return '<button type="button" class="mtile btile" data-bin="' + id + '"><span class="m-left"><span class="t-name">' + esc(t.name) + '</span><span class="t-bed">' + esc(t.bed) + '</span></span><span class="b-at">' + esc(String(t.binAt || '').slice(11, 16)) + '</span></button>';
+    }).join('');
+    if (state.renaming >= 0) { var inp = $('renameInput'); if (inp) { inp.focus(); inp.select(); } }
+  }
+  function backToNotDone(id) {
+    var at = locate(id); if (at) machines[at.m].cells[at.s].tile = null;
+    toNotDone(id); tiles[id].history.push({ time: now(), field: 'placement', to: null, reason: 'back to Not done' });
+    changed('back', { tile: id, name: tiles[id].name }); render();
+  }
+  function reset() {
+    var names = [];
+    machines.forEach(function (m) { m.cells.forEach(function (c) { if (c.tile && tiles[c.tile].pinned === false) { var id = c.tile; names.push(tiles[id].name); c.tile = null; toNotDone(id); tiles[id].history.push({ time: now(), field: 'placement', to: null, reason: 'reset' }); } }); });
+    if (!names.length) { toast('Nothing to reset'); return; }
+    changed('reset', { back: names }); render();
+  }
+  function blockSlot(mi, si) {
+    var c = machines[mi].cells[si], back = '';
+    if (c.tile) { var id = c.tile; back = tiles[id].name; toNotDone(id); c.tile = null; tiles[id].history.push({ time: now(), field: 'placement', to: null, reason: 'slot blocked' }); }
+    c.blocked = true; c.reason = '';
+    changed('block_slot', { machine: machines[mi].name, session: si + 1, back: back }); render();
+  }
+  function unblockSlot(mi, si) {
+    var m = machines[mi], c = m.cells[si]; c.blocked = false; c.reason = '';
+    changed('unblock_slot', { machine: m.name, session: si + 1 });
+    if (m.out && !m.cells.some(function (x) { return x.blocked; })) { m.out = false; changed('machine_back', { machine: m.name }); }
+    render();
+  }
+  function setOut(mi, out) {
+    var m = machines[mi], back = []; m.out = out;
+    m.cells.forEach(function (c) { if (out) { if (c.tile) { var id = c.tile; back.push(tiles[id].name); toNotDone(id); c.tile = null; tiles[id].history.push({ time: now(), field: 'placement', to: null, reason: 'machine out of service' }); } c.blocked = true; } else c.blocked = false; c.reason = ''; });
+    changed(out ? 'machine_out' : 'machine_back', { machine: m.name, back: back }); render();
+  }
+  function askOut(mi) {
+    var m = machines[mi], names = m.cells.map(function (c) { return c.tile ? tiles[c.tile].name : null; }).filter(Boolean);
+    if (names.length) ask('Block ' + m.name + '?', sendsBack('Blocking', m.name, names.length), 'Block machine', names, function () { setOut(mi, true); }); else setOut(mi, true);
+  }
+  function sweepToManual() {
+    state.notDone.slice().forEach(function (id) { if (tiles[id].problemCount) { state.notDone = state.notDone.filter(function (x) { return x !== id; }); state.manual.push(id); } });
+  }
+  function binOrder(id) {
+    var t = tiles[id]; if (!t || state.bin.indexOf(id) >= 0) return;
+    var at = locate(id), from = at ? machines[at.m].name + ' S' + (at.s + 1) : state.manual.indexOf(id) >= 0 ? 'Need manual intervention' : 'Unallocated';
+    if (at) machines[at.m].cells[at.s].tile = null;
+    state.notDone = state.notDone.filter(function (x) { return x !== id; });
+    t.binFrom = state.manual.indexOf(id) >= 0 ? 'manual' : 'notDone'; t.binAt = now(); t.pinned = false; t.red = false;
+    state.manual = state.manual.filter(function (x) { return x !== id; });
+    state.bin.unshift(id); delete held[id]; dupCheck();
+    t.history.push({ time: now(), field: 'placement', to: null, reason: 'deleted to the recycle bin' });
+    changed('delete_order', { tile: id, name: t.name, order: t.rec.order_id, from: from }); render();
+  }
+  function restoreOrder(id) {
+    var t = tiles[id]; if (!t || state.bin.indexOf(id) < 0) return;
+    state.bin = state.bin.filter(function (x) { return x !== id; }); dupCheck();
+    if (t.binFrom === 'manual' && t.reasons.length) state.manual.push(id); else toNotDone(id);
+    delete t.binFrom; delete t.binAt; sweepToManual();
+    var to = state.manual.indexOf(id) >= 0 ? 'Need manual intervention' : 'Unallocated';
+    t.history.push({ time: now(), field: 'placement', to: null, reason: 'restored from the recycle bin to ' + to });
+    changed('restore_order', { tile: id, name: t.name, order: t.rec.order_id, to: to }); render();
+  }
+  function purgeOrder(id) {
+    var t = tiles[id]; if (!t) return;
+    var at = locate(id); if (at) machines[at.m].cells[at.s].tile = null;
+    state.notDone = state.notDone.filter(function (x) { return x !== id; });
+    state.manual = state.manual.filter(function (x) { return x !== id; });
+    state.bin = state.bin.filter(function (x) { return x !== id; });
+    delete tiles[id]; delete held[id]; dupCheck();
+    changed('purge_order', { tile: id, name: t.name, order: t.rec.order_id, stored: t.rec.source.stored || '' });
+    removeStored(t); render();
+  }
+  function removeStored(t) {
+    var p = t.rec.source && t.rec.source.stored;
+    if (!p || p.indexOf('storage/') !== 0 || !store.dir || store.off) return Promise.resolve();
+    return store.dir.getDirectoryHandle('storage').then(function (sub) { return sub.removeEntry(p.slice(8)); }).catch(function (e) { changed('stored_not_removed', { stored: p, error: String(e && e.message || e) }); });
+  }
+  function askDeleteOrder(id) { ask('Delete ' + tiles[id].name + '?', '', 'Delete', [], function () { binOrder(id); }, null, 'The order goes to the recycle bin.'); }
+  function askPurge(id) { ask('Delete ' + tiles[id].name + ' for good?', '', 'Delete', [], function () { purgeOrder(id); }, null, 'It cannot be restored.'); }
+
+  var toastTimer = 0;
+  function toast(msg) { toastEl.textContent = msg; toastEl.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2600); }
+
+  var lastFocus = null, pendingRed = null, pendingAsk = null, detailsId = null, checkId = null, dupWarned = null;
+  var SCRIMS = ['detailsScrim', 'redScrim', 'checkScrim', 'warnScrim', 'machScrim', 'startScrim'];
+  function startMayClose() { return !!(store.dir || store.off); }
+  function anyDialogOpen() { return SCRIMS.some(function (id) { return !$(id).hidden; }); }
+  function behind(on) { $('boardView').inert = on; $('settingsView').inert = on; }
+  function openDialog(id) {
+    closeMenu(); if (!lastFocus || !anyDialogOpen()) lastFocus = document.activeElement;
+    var scrim = $(id); scrim.hidden = false;
+    behind(true);
+    var f = scrim.querySelector('[data-autofocus]') || scrim.querySelector('button:not([hidden]), input, select, textarea');
+    if (f) f.focus();
+  }
+  function closeDialogs() {
+    SCRIMS.forEach(function (id) { if (id !== 'startScrim' || startMayClose()) $(id).hidden = true; });
+    pendingRed = null;
+    var a = pendingAsk; pendingAsk = null; if (a && a.no) a.no();
+    behind(anyDialogOpen());
+    if (lastFocus && document.body.contains(lastFocus) && !anyDialogOpen()) { lastFocus.focus(); lastFocus = null; }
+  }
+  SCRIMS.forEach(function (id) { if (id === 'startScrim') return; var s = $(id); s.addEventListener('click', function (e) { if (e.target === s) closeDialogs(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.addEventListener('click', closeDialogs); });
+
+  function ask(title, label, button, names, yes, no, note) {
+    $('wTitle').textContent = title;
+    var lab = $('wLabel'); lab.textContent = label || ''; lab.hidden = !label;
+    $('wList').innerHTML = names.map(function (n) { return '<span class="pill p-general">' + esc(n) + '</span>'; }).join('');
+    $('wList').hidden = !names.length;
+    var nt = $('wNote'); nt.textContent = note || ''; nt.hidden = !note;
+    $('wConfirm').textContent = button || 'Remove';
+    openDialog('warnScrim'); pendingAsk = { yes: yes, no: no || null };
+  }
+  $('wConfirm').addEventListener('click', function () { var a = pendingAsk; pendingAsk = null; closeDialogs(); if (a && a.yes) a.yes(); });
+  $('wCancel').addEventListener('click', function () { if ($('checkScrim').hidden) { closeDialogs(); return; } $('warnScrim').hidden = true; pendingAsk = null; $('cDelete').focus(); });
+  function sendsBack(doing, what, n) { return doing + ' ' + what + ' sends ' + (n === 1 ? 'this patient' : 'these patients') + ' back to Unallocated:'; }
+
+  var FORM_SEGS = [
+    ['Patient', ['NAME', 'NRIC', 'BIRTH DATE', 'SEX', 'RACE', 'ADDRESS', 'ACCOUNT', 'CLASS', 'SERVICE', 'LOCATION']],
+    ['This order', ['Requesting Doctor', 'Consultant-in-charge', 'Order ID', 'Order Date', 'REQUESTED DATE', '1st Dialysis (this admission)', 'Priority', 'Schedule', 'Length (hrs)', 'Mode of Transport', 'Allergy (If any)']],
+    ['Usual dialysis', ['Usual Dialysis Centre', 'Dialysis Type', 'Dialysis Days', 'Session Time (hrs)', 'Dry Weight (kg)', 'QB (ml/min)', 'QD (ml/min)', 'AntiCoag', 'Repl Flow site']],
+    ['Access', ['Functioning Vascular Access present?', 'Access Side', 'Type of Vascular Access to be used', 'Buttonhole', 'Access Site', 'Transonic Flow', 'Filter', 'Tego Needleless Connector - Date of Change', 'Tego Needleless Connector -Due']],
+    ['Heparin and fluid', ['Allergic to Heparin?', 'Heparin', 'Dry Weight (kg)', 'Ultrafiltration (L)', 'Heparin Initial (Units)', 'Heparin hourly (Units)']],
+    ['Virology', ['HIV', 'HIV Case', 'HepBsAg', 'HepB Case', 'Anti-HCV', 'HepC Case', 'HP (If any)']],
+    ['Dialysate', ['QB (ml/min)', 'Type of Dialysate', 'Fixed NA+ conc (mmol/L)', 'QD (ml/min)', 'Dialysate Temperature']],
+    ['Remarks and notes', ['Additional Remarks / Instructions', 'Special Notes', 'DIABETIC', 'RDC']],
+    ['Footer', ['Printed On', 'Ordered On', 'Page']]
+  ];
+  var FORM_HEADS = { 'PRESCRIPTION FROM OUTPATIENT DIALYSIS CENTRE': 2, 'ACCESS': 3, 'ANTI-COAG FLUID MANAGEMENT': 4, 'ANTI-COAG': 4, 'FLUID MANAGEMENT': 4, 'VIROLOGY RESULTS VIROLOGY STATUS': 5, 'VIROLOGY RESULTS': 5, 'VIROLOGY STATUS': 5, 'DIALYSATE': 6 };
+  var FORM_STARTS = { 'NAME': 0, 'Requesting Doctor': 1, 'Additional Remarks / Instructions': 7, 'Special Notes': 7, 'Printed On': 8 };
+  var FORM_RUNS_ON = ['ADDRESS', 'Usual Dialysis Centre'];
+  var FORM_CANON = {}, FORM_LABEL = (function () {
+    var all = [];
+    FORM_SEGS.forEach(function (s) { s[1].forEach(function (l) { var k = l.replace(/\s+/g, ''); if (!FORM_CANON[k]) { FORM_CANON[k] = l; if (l !== 'Page') all.push(l); } }); });
+    all.sort(function (a, b) { return b.length - a.length; });
+    return new RegExp('(?<![^\\s,])(?:(' + all.map(function (l) { return l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ +/g, '\\s*'); }).join('|') + ')\\s*:|(Page)(?=\\s+\\d+\\s+of\\s+\\d))', 'g');
+  })();
+  function squeeze(s) { return s.replace(/\s+/g, ' ').trim(); }
+  function formHits(line) {
+    var hits = [], m;
+    FORM_LABEL.lastIndex = 0;
+    while ((m = FORM_LABEL.exec(line))) hits.push({ at: m.index, end: m.index + m[0].length, label: FORM_CANON[(m[1] || m[2]).replace(/\s+/g, '')] });
+    return hits;
+  }
+  function formSections(text) {
+    var segs = FORM_SEGS.map(function (s) { return { title: s[0], rows: [] }; }), block = -1, last = null, remarks = null;
+    function here() { return block < 0 ? 8 : block; }
+    function home(label) {
+      if (FORM_SEGS[here()][1].indexOf(label) >= 0) return here();
+      for (var i = 0; i < FORM_SEGS.length; i++) if (FORM_SEGS[i][1].indexOf(label) >= 0) return i;
+      return here();
+    }
+    function add(si, row) {
+      var rows = segs[si].rows, k = row.label ? FORM_SEGS[si][1].indexOf(row.label) : -1;
+      row.key = k >= 0 ? k : block < 0 ? 99 : rows.length ? rows[rows.length - 1].key : -1;
+      rows.push(row); return row;
+    }
+    String(text || '').split('\n').forEach(function (raw) {
+      var line = raw.replace(/\u00f9[^\u00d6]*\u00d6/g, '').trim();
+      if (remarks && !/^(Special\s*Notes|Printed\s*On)\s*:/.test(line) && !/\bPage\s+\d+\s+of\s+\d+/.test(line)) { if (line) remarks.value += '\n' + squeeze(line); return; }
+      remarks = null;
+      if (!line) { last = null; return; }
+      if (FORM_HEADS[squeeze(line)] != null) { block = FORM_HEADS[squeeze(line)]; last = null; return; }
+      var hits = formHits(line);
+      if (!hits.length) {
+        if (last && FORM_RUNS_ON.indexOf(last.label) >= 0) last.value += ' ' + squeeze(line);
+        else { add(here(), { line: squeeze(line) }); last = null; }
+        return;
+      }
+      if (FORM_STARTS[hits[0].label] != null) block = FORM_STARTS[hits[0].label];
+      var si = home(hits[0].label);
+      hits = hits[0].label === 'Additional Remarks / Instructions' ? hits.slice(0, 1) : hits.filter(function (h, i) { return !i || home(h.label) === si; });
+      if (hits[0].at > 0) add(si, { line: squeeze(line.slice(0, hits[0].at)) });
+      hits.forEach(function (h, i) {
+        var end = i + 1 < hits.length ? hits[i + 1].at : line.length, value = squeeze(line.slice(h.end, end));
+        last = add(si, { label: h.label, value: end < line.length ? value.replace(/,$/, '') : value });
+        if (h.label === 'Additional Remarks / Instructions') remarks = last;
+      });
+    });
+    segs = segs.filter(function (s) { return s.rows.length; });
+    segs.forEach(function (s) { s.rows.sort(function (a, b) { return a.key - b.key; }); s.rows.forEach(function (r) { delete r.key; }); });
+    return segs;
+  }
+  function formHtml(segs, patient) {
+    return segs.filter(function (s) { return (patient || s.title !== 'Patient') && s.title !== 'Footer'; }).map(function (s) {
+      return '<h4>' + esc(s.title) + '</h4><dl class="d-list">' + s.rows.map(function (r) { return r.line != null ? '<dd class="span2">' + esc(r.line) + '</dd>' : '<dt>' + esc(r.label) + '</dt><dd>' + esc(r.value) + '</dd>'; }).join('') + '</dl>';
+    }).join('');
+  }
+
+  function setRow(dt, dd, text) { var a = $(dt), b = $(dd); a.hidden = !text; b.hidden = !text; b.textContent = text || ''; }
+  function fillDetails(t) {
+    $('dTitle').textContent = t.name;
+    $('dBed').textContent = t.bed;
+    var tags = dateHtml(t) + (t.red ? '<span class="pill b-hepb">' + ICON_ALERT + 'Red alert</span>' : '');
+    var tagsEl = $('dTags'); tagsEl.innerHTML = tags; tagsEl.hidden = !tags;
+    $('dIc').textContent = t.nric || 'None';
+    $('dOrder').textContent = t.rec.order_id || 'None';
+    $('dDate').textContent = t.date ? fmt(t.date, 'full') : 'None';
+    $('dTreat').textContent = t.treatment || 'Not stated';
+    $('dUrg').textContent = t.priority ? t.priority + (t.rec.priority_rule ? ': ' + t.rec.priority_rule : '') : 'Not stated';
+    $('dPts').textContent = cellsOf(t).map(function (c, s) { return 'S' + (s + 1) + ' ' + c; }).join(', ');
+    $('dCentre').textContent = centreOf(squeeze(boxText(t, CENTRE_BOX))) || 'not found';
+    setRow('dRemT', 'dRem', t.remarks);
+    setRow('dRadT', 'dRad', (t.radiology || []).map(function (r) { return fmt(r.date) + ' ' + r.time + ' ' + r.name; }).join('; '));
+    var v = t.rec.virology || {};
+    setRow('dVirT', 'dVir', (v.hepb_case || v.hbsag || v.hp) ? 'HepB Case ' + (v.hepb_case || '?') + ' (HBsAg ' + (v.hbsag || '?') + '); HIV ' + (v.hiv_case || '?') + '; HepC ' + (v.hepc_case || '?') + '; HP ' + (v.hp || '?') : '');
+    $('dText').innerHTML = formHtml(formSections(t.rec.source.text));
+    $('dTextBtn').hidden = !t.rec.source.text;
+    $('dBack').hidden = !locate(t.id);
+  }
+  function openDetails(id) {
+    var t = tiles[id]; if (!t) return; detailsId = id; fillDetails(t);
+    $('dTicks').innerHTML = ticksHtml(t, 'd');
+    $('dTextSec').hidden = true;
+    openDialog('detailsScrim');
+  }
+  $('dTicks').addEventListener('change', function () {
+    if (!detailsId) return;
+    var t = tiles[detailsId], before = t.statuses.slice();
+    t.statuses = readTicks($('dTicks'));
+    t.history.push({ time: now(), field: 'statuses', from: before, to: t.statuses.slice(), reason: 'nurse' });
+    changed('statuses', { tile: t.id, name: t.name, from: before, to: t.statuses.slice() });
+    recheck(); render(); fillDetails(t);
+  });
+  $('dTextBtn').addEventListener('click', function () { var s = $('dTextSec'); s.hidden = !s.hidden; });
+  $('dBack').addEventListener('click', function () { var id = detailsId; closeDialogs(); if (id) backToNotDone(id); });
+
+  function openRedAlert(id, to) {
+    var t = tiles[id], m = machines[to.m];
+    $('raFrom').innerHTML = esc(t.name) + (t.statuses.indexOf('hepb') >= 0 ? ' <span class="pill b-hepb">HEP B</span>' : '');
+    $('raTo').innerHTML = esc(m.name) + ' ' + purposePill(m);
+    $('raReason').value = '';
+    openDialog('redScrim'); pendingRed = { id: id, to: to };
+  }
+  $('raConfirm').addEventListener('click', function () {
+    var p = pendingRed, reason = $('raReason').value.trim(); pendingRed = null; closeDialogs();
+    if (p) { place(p.id, p.to, true, false, reason || '(no reason typed)'); render(); }
+  });
+  $('raCancel').addEventListener('click', closeDialogs);
+
+  function fillCheckFields(f) {
+    $('cName').value = f.name || ''; $('cIc').value = f.nric || ''; $('cBed').value = f.location || '';
+    $('cOrder').value = f.order_id || ''; $('cDate').value = f.requested_date || '';
+    $('cUrg').value = f.priority ? String(f.priority) : ''; $('cTreat').value = f.treatment || ''; $('cRemarks').value = f.remarks || '';
+    $('cOrder').classList.toggle('flagged', !f.order_id); $('cDate').classList.toggle('flagged', !f.requested_date); $('cUrg').classList.toggle('flagged', !f.priority);
+  }
+  function readCheckFields() {
+    return { name: $('cName').value.trim(), nric: $('cIc').value.trim(), location: $('cBed').value.trim(), order_id: $('cOrder').value.trim(), date: $('cDate').value,
+      priority: +$('cUrg').value, treatment: $('cTreat').value.trim(), remarks: $('cRemarks').value.trim() };
+  }
+  function whyHtml(reasons) {
+    var keys = [];
+    reasons.forEach(function (r) { var k = r.code || ''; if (keys.indexOf(k) < 0) keys.push(k); });
+    return keys.map(function (c) {
+      var mine = reasons.filter(function (r) { return (r.code || '') === c; });
+      if (!c) return mine.map(function (r) { return '<div class="why"><p class="why-t">' + esc(r.text) + '</p></div>'; }).join('');
+      return '<div class="why"><p class="why-t">' + c + ' ' + esc(REASONS[c][0]) + '</p><p>' + esc(REASONS[c][1]) + '</p>' + mine.map(function (r) { return (r.rule ? '<p>' + esc(r.rule) + '</p>' : '') + (r.quote ? '<p class="quote">' + esc(r.quote) + '</p>' : ''); }).join('') + '</div>';
+    }).join('');
+  }
+  function showWhy(reasons) { $('cWhy').innerHTML = whyHtml(reasons); }
+  function openCheck(id) {
+    var t = tiles[id]; if (!t) return; checkId = id;
+    var text = t.rec.source.text || '';
+    $('cFileRow').hidden = !text && !t.rec.source.stored; $('cFile').textContent = t.rec.source.stored || t.rec.source.pdf || '';
+    $('cPage').hidden = !text; $('cPage').innerHTML = formHtml(formSections(text), true); $('cPage').scrollTop = 0;
+    fillCheckFields({ name: t.rec.name, nric: t.nric, location: t.bed, order_id: t.rec.order_id, requested_date: t.date, priority: t.priority, treatment: t.treatment, remarks: t.remarks });
+    showWhy(t.reasons.length ? t.reasons : [{ code: 'R01', quote: 'Read it, then Accept' }]);
+    $('cTicks').innerHTML = ticksHtml(t, 'c');
+    openDialog('checkScrim');
+  }
+  function buildRecord(f) {
+    var rec = parseOrder(f.text || '', f.text ? 'pasted' : 'typed');
+    if (f.name) rec.name = f.name; if (f.nric) rec.nric = f.nric; if (f.location) rec.location = f.location;
+    rec.order_id = f.order_id || rec.order_id || (f.text ? '' : 'TYPED-' + fileStamp());
+    if (f.date) rec.requested_date = f.date;
+    if (f.priority) { rec.priority = f.priority; if (!rec.priority_rule) rec.priority_rule = PRI_RULE[f.priority] || ''; }
+    if (f.treatment && f.treatment !== rec.treatment) { rec.treatment = f.treatment; rec.length_hours = ''; }
+    if (f.remarks !== undefined && f.remarks !== null) rec.remarks = f.remarks;
+    if (!rec.ordered_on) rec.ordered_on = now();
+    return rec;
+  }
+  function addOrder(f, ticks) {
+    var rec = buildRecord(f);
+    if (orderTaken(rec.order_id, null)) return { error: 'Order ' + rec.order_id + ' is already in' };
+    var t = makeTile(rec);
+    if (ticks && !sameSet(ticks, t.statuses)) { var before = t.statuses.slice(); t.statuses = ticks.slice(); t.history.push({ time: now(), field: 'statuses', from: before, to: ticks.slice(), reason: 'nurse' }); }
+    refreshReason(t);
+    if (t.problemCount) state.manual.push(t.id); else toNotDone(t.id);
+    sweepToManual();
+    changed('add_order', { tile: t.id, name: t.name, order: rec.order_id, date: t.date, how: f.text ? 'pasted' : 'typed', where: t.reasons.length ? 'manual: ' + codesOf(t).join(' ') : 'not done' });
+    return { tile: t };
+  }
+  $('cAccept').addEventListener('click', function () {
+    var f = readCheckFields();
+    var date = $('cDate');
+    if (!f.date) { date.classList.add('flagged'); date.focus(); return; }
+    var urg = $('cUrg');
+    if (!f.priority) { urg.classList.add('flagged'); urg.focus(); return; }
+    var id = checkId; if (!id || !tiles[id]) return;
+    var t = tiles[id], rec = t.rec;
+    var newOrder = f.order_id || rec.order_id || ('TYPED-' + id);
+    if (orderTaken(newOrder, id)) { showWhy([{ text: 'Order ' + newOrder + ' is already in' }]); $('cOrder').classList.add('flagged'); $('cOrder').focus(); return; }
+    var hadDup = !checkOn('R19') || t.fixedProblems.some(function (p) { return p.code === 'R19'; });
+    var nowDup = Object.keys(tiles).some(function (o) { return o !== id && tiles[o].nric && tiles[o].nric === (f.nric || rec.nric) && tiles[o].date === f.date; });
+    if (nowDup && !hadDup && dupWarned !== id) { dupWarned = id; showWhy([{ code: 'R19', quote: 'Another order has this IC for this date. Accept again to keep it.' }]); $('cIc').classList.add('flagged'); return; }
+    var edits = [];
+    function setField(field, value) { if (value !== rec[field]) { t.history.push({ time: now(), field: field, from: rec[field], to: value, reason: 'nurse' }); edits.push(field); rec[field] = value; } }
+    setField('name', f.name || rec.name);
+    setField('nric', f.nric || rec.nric);
+    setField('location', f.location || rec.location);
+    setField('order_id', newOrder);
+    setField('requested_date', f.date);
+    setField('priority', f.priority);
+    if (!rec.priority_rule || edits.indexOf('priority') >= 0) rec.priority_rule = PRI_RULE[f.priority] || '';
+    setField('remarks', f.remarks);
+    var before = t.statuses.slice();
+    t.statuses = readTicks($('cTicks'));
+    if (!sameSet(before, t.statuses)) { t.history.push({ time: now(), field: 'statuses', from: before, to: t.statuses.slice(), reason: 'nurse' }); edits.push('statuses'); }
+    t.name = tileName(rec); t.nric = rec.nric; t.bed = rec.location; t.date = rec.requested_date; t.priority = rec.priority; t.remarks = rec.remarks;
+    if (f.treatment && f.treatment !== t.treatment) { t.treatment = f.treatment; rec.treatment = f.treatment; rec.length_hours = ''; edits.push('treatment'); }
+    t.accepted = true; t.checkOnly = false; rec.accepted_at = now();
+    t.history.push({ time: now(), field: 'accepted', to: true, reason: 'nurse' });
+    rerule(t, false);
+    state.manual = state.manual.filter(function (x) { return x !== id; });
+    toNotDone(id); sweepToManual(); dupWarned = null; delete held[id];
+    changed('accept', { tile: id, name: t.name, order: rec.order_id, edited: edits });
+    closeDialogs(); render();
+  });
+  $('cCancel').addEventListener('click', closeDialogs);
+  $('cDelete').addEventListener('click', function () { askDeleteOrder(checkId); });
+
+  var machId = -1;
+  function openMachine(mi) {
+    var m = machines[mi]; machId = mi;
+    $('mTitle').textContent = m.name;
+    $('mName').value = m.name;
+    $('mTicks').innerHTML = ticksHtml({ statuses: m.takes }, 'm');
+    $('mOut').checked = m.out;
+    openDialog('machScrim');
+  }
+  $('mOk').addEventListener('click', function () {
+    if (machId < 0) return;
+    var m = machines[machId], mi = machId, was = m.name;
+    m.name = $('mName').value.trim().slice(0, 24) || m.name;
+    var takesBefore = m.takes.slice(), ticks = readTicks($('mTicks'));
+    if (!sameSet(ticks, m.takes)) m.takes = ticks;
+    var out = $('mOut').checked;
+    closeDialogs();
+    if (was !== m.name || !sameSet(takesBefore, m.takes)) changed('machine', { machine: was, name: m.name, takes: m.takes.slice() });
+    if (out !== m.out) setOut(mi, out);
+    recheck(); render();
+  });
+  $('mCancel').addEventListener('click', closeDialogs);
+
+  function showSettings() { closeMenu(); syncDrafts(); fillGeneral(); $('boardView').hidden = true; $('settingsView').hidden = false; window.scrollTo(0, 0); }
+  function showBoard() { $('settingsView').hidden = true; $('boardView').hidden = false; render(); window.scrollTo(0, 0); }
+  $('settingsBtn').addEventListener('click', showSettings);
+  function fillGeneral() {
+    var can = 'showDirectoryPicker' in window, on = state.settings.check_each !== false;
+    $('setData').textContent = store.dir ? store.dir.name : store.off ? 'Not saving' : 'None';
+    $('setOrders').textContent = store.orders ? store.orders.name : store.dir ? store.dir.name + '/orders' : 'None';
+    $('setDataBtn').hidden = !can; $('setOrdersBtn').hidden = !can;
+    $('reviewSw').checked = on; $('reviewWord').textContent = on ? 'On' : 'Off';
+    $('centreSw').checked = !!state.settings.review_centres; $('centreWord').textContent = state.settings.review_centres ? 'On' : 'Off';
+    drawBuiltins();
+  }
+  $('setDataBtn').addEventListener('click', function () {
+    window.showDirectoryPicker({ id: 'dialysis-allocator', mode: 'readwrite' }).then(connectUI, function (e) { if (!e || e.name !== 'AbortError') { openStart(); showErr(e); } }).then(fillGeneral);
+  });
+  $('setOrdersBtn').addEventListener('click', function () {
+    window.showDirectoryPicker({ id: 'dialysis-orders', mode: 'readwrite' }).then(function (h) {
+      store.orders = h; handles.put('orders', h);
+      changed('orders_folder', { folder: h.name }); fillGeneral(); toast('Orders folder ' + h.name);
+    }, function (e) { if (!e || e.name !== 'AbortError') toast('Could not open: ' + (e.message || e)); });
+  });
+  $('reviewSw').addEventListener('change', function () { state.settings.check_each = this.checked; $('reviewWord').textContent = this.checked ? 'On' : 'Off'; changed('check_each', { on: this.checked }); });
+
+  var NAMES = { centres: 'Dialysis centres', status: 'Matching rules', rules: 'Allocation rules' }, SECS = Object.keys(NAMES);
+  var sec = { centres: { draft: [], dirty: false }, status: { draft: { list: [], rules: [] }, dirty: false, dup: false }, rules: { draft: [], dirty: false } };
+  var removed = {}, nextId = 1;
+  function applied(k) { var s = state.settings; return clone(k === 'centres' ? s.centres : k === 'status' ? { list: s.statuses, rules: s.matching } : s.allocation); }
+  function canApply(k) { return sec[k].dirty && !(k === 'status' && sec.status.dup); }
+  function leaveGuard(e) { e.preventDefault(); e.returnValue = ''; }
+  function refresh() {
+    SECS.forEach(function (k) { $(k + 'Dirty').hidden = !sec[k].dirty; $(k + 'Apply').disabled = !canApply(k); });
+    window[SECS.some(function (k) { return sec[k].dirty; }) ? 'addEventListener' : 'removeEventListener']('beforeunload', leaveGuard);
+  }
+  function mark(k) { sec[k].dirty = true; refresh(); }
+  function drawSection(k) { if (k === 'status') drawStatus(); else if (k === 'centres') drawCentres(); else drawRules(); }
+  function resetDrafts() { removed = {}; SECS.forEach(function (k) { sec[k].draft = applied(k); sec[k].dirty = false; drawSection(k); }); refresh(); }
+  function syncDrafts() { SECS.forEach(function (k) { if (!sec[k].dirty) { sec[k].draft = applied(k); drawSection(k); } }); refresh(); }
+  function newId() {
+    var used = {};
+    [state.settings.statuses, state.settings.matching, sec.status.draft.list, sec.status.draft.rules].forEach(function (l) { l.forEach(function (x) { used[x.id] = true; }); });
+    Object.keys(removed).forEach(function (id) { used[id] = true; removed[id].rules.forEach(function (g) { used[g.line.id] = true; }); });
+    while (used['n' + nextId]) nextId++;
+    return 'n' + nextId++;
+  }
+  function commit(k) {
+    if (k === 'status') Object.keys(removed).forEach(function (id) { removed[id].rules.forEach(function (g) { var r = clone(g.line); r.status = 'manual'; putBack(sec.status.draft.rules, { line: r, at: g.at, next: g.next }); }); });
+    applySettings(k, sec[k].draft); sec[k].draft = applied(k); sec[k].dirty = false; if (k === 'status') removed = {};
+    drawSection(k); refresh();
+  }
+  function discard(k) { sec[k].draft = applied(k); sec[k].dirty = false; if (k === 'status') removed = {}; drawSection(k); refresh(); }
+  function applySettings(k, value) {
+    var s = state.settings, line = { section: NAMES[k] };
+    if (k === 'centres') { s.centres = wordList(value); line.words = s.centres.slice(); }
+    else if (k === 'rules') { s.allocation = cleanSettings({ allocation: value }).allocation; line.rules = s.allocation.map(ruleLine); }
+    else {
+      var c = cleanSettings({ statuses: value.list, matching: value.rules }), gone = s.statuses.filter(function (a) { return !c.statuses.some(function (x) { return x.id === a.id; }); });
+      s.statuses = c.statuses; s.matching = c.matching; useStatuses(s.statuses);
+      Object.keys(tiles).forEach(function (id) {
+        var t = tiles[id], keep = knownStatuses(t.statuses);
+        if (keep.length !== t.statuses.length) t.history.push({ time: now(), field: 'statuses', from: t.statuses.slice(), to: keep.slice(), reason: 'status removed' });
+        t.statuses = keep;
+      });
+      machines.forEach(function (m) { m.takes = knownStatuses(m.takes); });
+      line.statuses = s.statuses.map(function (x) { return x.name; }); line.rules = s.matching.map(matchLine);
+      if (gone.length) line.removed = gone.map(function (x) { return x.name; });
+    }
+    reread();
+    changed('settings', line); render();
+  }
+  function reread() {
+    Object.keys(tiles).forEach(function (id) { rerule(tiles[id], false); });
+    machines.forEach(function (m) {
+      m.cells.forEach(function (c, s) {
+        var t = c.tile && tiles[c.tile]; if (!t || !t.reasons.length) return;
+        held[t.id] = { m: m, s: s }; c.tile = null; state.manual.push(t.id);
+        t.history.push({ time: now(), field: 'placement', to: null, reason: 'stopped for review' });
+      });
+    });
+    sweepToManual();
+    state.manual.slice().forEach(function (id) {
+      var t = tiles[id]; if (t.reasons.length) return;
+      state.manual = state.manual.filter(function (x) { return x !== id; });
+      var h = held[id], c = h && machines.indexOf(h.m) >= 0 && h.m.cells[h.s]; delete held[id];
+      if (c && !c.tile && !c.blocked) { c.tile = id; t.history.push({ time: now(), field: 'placement', to: h.m.name + ' S' + (h.s + 1), reason: 'stop lifted' }); } else toNotDone(id);
+    });
+    recheck();
+  }
+  var boxFocus = null;
+  function openBox(id) {
+    boxFocus = document.activeElement; $(id).hidden = false; $('settingsView').inert = true;
+    var f = $(id).querySelector('[data-autofocus]') || $(id).querySelector('button:not(:disabled)');
+    if (f) f.focus();
+  }
+  function closeBox(id) { $(id).hidden = true; $('settingsView').inert = false; if (boxFocus && document.body.contains(boxFocus)) boxFocus.focus(); }
+  var rmKeep = null, rmGo = null;
+  function askRemove(name, use, hepB, keep, go) {
+    $('rmTitle').textContent = 'Remove ' + name + '?';
+    $('rmText').textContent = use.replace(', ', ' and ') + ' lose the tick. Orders that say ' + name + ' will trigger manual review.' + (hepB ? ' Hep B patients will no longer be kept to Hep B machines.' : '');
+    $('rmGo').textContent = 'Remove ' + name;
+    rmKeep = keep; rmGo = go; openBox('removeScrim');
+  }
+  $('rmKeep').addEventListener('click', function () { var f = rmKeep; rmKeep = rmGo = null; closeBox('removeScrim'); f(); });
+  $('rmGo').addEventListener('click', function () { var f = rmGo; rmKeep = rmGo = null; closeBox('removeScrim'); f(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-sec]'), function (s) {
+    s.querySelector('.sec-head').addEventListener('click', function () {
+      var open = s.classList.contains('folded');
+      s.querySelector('.sec-body').hidden = !open; s.classList.toggle('folded', !open);
+      var h = s.querySelector('.sec-head'); h.setAttribute('aria-expanded', String(open)); h.querySelector('.chev').textContent = open ? '▾' : '▸';
+    });
+  });
+  function drawBuiltins() {
+    $('builtinList').innerHTML = Object.keys(REASONS).filter(function (c) { return c >= 'R10'; }).map(function (c) {
+      var on = checkOn(c);
+      return '<div class="set-row"><div class="set-text"><span class="set-title" id="bi' + c + '">' + c + ' ' + esc(REASONS[c][0]) + '</span><span class="set-desc">' + esc(REASONS[c][1]) + '</span></div>' +
+        (SWITCHED.indexOf(c) >= 0 ? '<label class="sw-wrap"><span>' + (on ? 'On' : 'Off') + '</span><input type="checkbox" role="switch" class="switch" data-check="' + c + '" aria-labelledby="bi' + c + '"' + (on ? ' checked' : '') + '></label>' : '<span class="sw-fixed">Always on</span>') + '</div>';
+    }).join('');
+  }
+  $('builtinList').addEventListener('change', function (e) {
+    var c = e.target.getAttribute('data-check'); if (!c) return;
+    e.target.previousElementSibling.textContent = e.target.checked ? 'On' : 'Off';
+    state.settings.checks[c] = e.target.checked; reread(); changed('check', { code: c, on: e.target.checked }); render();
+  });
+  function drawCentres() { $('centreList').innerHTML = chipsHtml(sec.centres.draft); }
+  $('centreList').addEventListener('chips', function (e) { sec.centres.draft = chipWords(e.target); mark('centres'); });
+  $('centresRestore').addEventListener('click', function () { sec.centres.draft = clone(CENTRE_WORDS); drawCentres(); mark('centres'); });
+  $('centresApply').addEventListener('click', function () { commit('centres'); toast('Applied'); });
+  $('centreSw').addEventListener('change', function () { state.settings.review_centres = this.checked; $('centreWord').textContent = this.checked ? 'On' : 'Off'; reread(); changed('review_centres', { on: this.checked }); render(); });
+  var ICON_X_SM = '<svg class="ic" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg>';
+  function chipHtml(w) { return '<span class="chip"><span class="chip-t">' + esc(w) + '</span><button type="button" class="chip-x" aria-label="Remove ' + esc(w) + '">' + ICON_X_SM + '</button></span>'; }
+  function chipsHtml(words) { return '<div class="chips">' + words.map(chipHtml).join('') + '<input type="text" class="chip-in" placeholder="Add word" aria-label="Add word"></div>'; }
+  function chipWords(box) { return Array.prototype.map.call(box.querySelectorAll('.chip-t'), function (t) { return t.textContent; }); }
+  function chipsChanged(box) { box.dispatchEvent(new Event('chips', { bubbles: true })); }
+  function addChips(inp, text) {
+    var words = text.split(',').map(function (w) { return w.trim(); }).filter(Boolean);
+    inp.value = '';
+    words.forEach(function (w) { inp.insertAdjacentHTML('beforebegin', chipHtml(w)); });
+    if (words.length) chipsChanged(inp.parentNode);
+  }
+  function isEntry(el) { return !!(el && el.classList && el.classList.contains('chip-in')); }
+  document.addEventListener('keydown', function (e) {
+    var inp = e.target; if (!isEntry(inp)) return;
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addChips(inp, inp.value); }
+    else if (e.key === 'Tab') addChips(inp, inp.value);
+    else if (e.key === 'Backspace' && inp.value === '' && inp.previousElementSibling) { inp.previousElementSibling.remove(); chipsChanged(inp.parentNode); }
+  });
+  document.addEventListener('input', function (e) { if (isEntry(e.target) && e.target.value.indexOf(',') >= 0) addChips(e.target, e.target.value); });
+  document.addEventListener('click', function (e) {
+    var box = e.target.closest && e.target.closest('.chips'); if (!box) return;
+    var x = e.target.closest('.chip-x');
+    if (x) { x.parentNode.remove(); chipsChanged(box); }
+    box.querySelector('.chip-in').focus();
+  });
+  function boxOpt(v, text, sel) { return '<option value="' + esc(v) + '"' + (v === sel ? ' selected' : '') + '>' + esc(text) + '</option>'; }
+  function boxOpts(sel) {
+    return '<button type="button"><selectedcontent></selectedcontent></button>' + FIXED_BOXES.map(function (b) { return boxOpt(b, b, sel); }).join('') +
+      FORM_BOXES.map(function (g) { return '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function (b) { return boxOpt(g[0] + '/' + b, b, sel); }).join('') + '</optgroup>'; }).join('');
+  }
+  document.addEventListener('input', function (e) { if (e.target.classList && e.target.classList.contains('t-box')) e.target.title = boxName(e.target.value); });
+  function opts(list, sel) { return list.map(function (o) { return '<option' + (o === sel ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join(''); }
+  var DEL_RULE = '<button type="button" class="icon-btn" data-do="del" aria-label="Remove rule">' + ICON_X + '</button>';
+  var ICON_COPY = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4"></path></svg>';
+  function copyBtn(what) { return '<button type="button" class="icon-btn" data-do="copy" aria-label="Duplicate ' + what + '">' + ICON_COPY + '</button>'; }
+  var GRIP = '<button type="button" class="grip" tabindex="-1" aria-label="Move"><svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true"><circle cx="2" cy="2" r="1.5"></circle><circle cx="8" cy="2" r="1.5"></circle><circle cx="2" cy="8" r="1.5"></circle><circle cx="8" cy="8" r="1.5"></circle><circle cx="2" cy="14" r="1.5"></circle><circle cx="8" cy="14" r="1.5"></circle></svg></button>';
+  var UNUSED = '0 patients, 0 machines';
+  function useOf(id) {
+    var p = Object.keys(tiles).filter(function (k) { return tiles[k].statuses.indexOf(id) >= 0; }).length, m = machines.filter(function (x) { return x.takes.indexOf(id) >= 0; }).length;
+    return p + (p === 1 ? ' patient, ' : ' patients, ') + m + (m === 1 ? ' machine' : ' machines');
+  }
+  function statOpts(sel) { return sec.status.draft.list.map(function (s) { return '<option value="' + esc(s.id) + '"' + (s.id === sel ? ' selected' : '') + '>tick ' + esc(s.name) + '</option>'; }).join('') + '<option value="manual"' + (sel === 'manual' ? ' selected' : '') + '>triggers manual review</option>'; }
+  function statName(id) { if (id === 'manual') return 'manual review'; var s = sec.status.draft.list.filter(function (x) { return x.id === id; })[0]; return s ? s.name.trim() : ''; }
+  function statHtml(s, i) {
+    return '<div class="stat" data-i="' + i + '">' + GRIP + '<input type="text" class="s-name" maxlength="24" aria-label="Status name" value="' + esc(s.name) + '">' +
+      '<span class="s-use">' + esc(useOf(s.id)) + '</span>' + copyBtn('status') + '<button type="button" class="icon-btn" data-do="del" aria-label="Remove status">' + ICON_X + '</button><div class="s-dup" hidden></div></div>';
+  }
+  function matchHtml(r, i) {
+    return '<div class="line" data-i="' + i + '">' + GRIP + '<div class="sent"><div class="if">' +
+      '<span class="w">If</span><select class="t-box" data-k="box" aria-label="Box" title="' + esc(boxName(r.box)) + '">' + boxOpts(r.box) + '</select>' +
+      '<span class="w">has</span><select data-k="mode" aria-label="Match">' + opts(MODES, r.mode) + '</select>' + chipsHtml(r.words) +
+      '</div><div class="then"><select class="t-status" data-k="status" aria-label="Then">' + statOpts(r.status) + '</select>' +
+      '</div></div>' + copyBtn('rule') + DEL_RULE + '<div class="s-dup" hidden></div></div>';
+  }
+  function drawMatch() { $('matchList').innerHTML = sec.status.draft.rules.map(matchHtml).join(''); checkDups(); }
+  function drawStatus() { $('statList').innerHTML = sec.status.draft.list.map(statHtml).join(''); drawMatch(); }
+  function checkDups() {
+    var seen = Object.create(null), any = false, rows = $('matchList').children;
+    sec.status.draft.rules.forEach(function (r, i) {
+      var msgs = [], chips = rows[i].querySelectorAll('.chip'), allow = r.mode === 'none of' || r.mode === 'other than';
+      r.words.forEach(function (w, j) {
+        if (allow) { chips[j].classList.remove('dup'); return; }
+        var k = w.trim().toLowerCase(), first = seen[k], bad = !!first && first.status !== r.status;
+        if (!first) seen[k] = r;
+        if (bad) msgs.push(w.trim() + ' is already under ' + statName(first.status));
+        chips[j].classList.toggle('dup', bad);
+      });
+      var m = rows[i].querySelector('.s-dup'); m.innerHTML = msgs.map(esc).join('<br>'); m.hidden = !msgs.length;
+      if (msgs.length) any = true;
+    });
+    var names = Object.create(null), stats = $('statList').children;
+    sec.status.draft.list.forEach(function (s, i) {
+      var k = s.name.trim().toLowerCase(), first = k ? names[k] : null, m = stats[i].querySelector('.s-dup');
+      if (k && !first) names[k] = s;
+      stats[i].querySelector('.s-name').classList.toggle('dup', !!first);
+      m.textContent = first ? 'Same name as ' + first.name.trim() : ''; m.hidden = !first;
+      if (first) any = true;
+    });
+    sec.status.dup = any;
+  }
+  $('statList').addEventListener('input', function (e) {
+    var row = e.target.closest('.stat'); if (!row) return;
+    var s = sec.status.draft.list[+row.dataset.i];
+    s.name = e.target.value;
+    Array.prototype.forEach.call($('matchList').querySelectorAll('.t-status option'), function (o) { if (o.value === s.id) o.textContent = 'tick ' + s.name; });
+    checkDups(); mark('status');
+  });
+  $('statList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-do="del"]'); if (!b) return;
+    var d = sec.status.draft, i = +b.closest('.stat').dataset.i, s = d.list.splice(i, 1)[0], gone = [];
+    d.rules = d.rules.filter(function (r, k) {
+      if (r.status !== s.id) return true;
+      var n = k + 1; while (n < d.rules.length && d.rules[n].status === s.id) n++;
+      gone.push({ line: r, at: k, next: d.rules[n] ? d.rules[n].id : null });
+      return false;
+    });
+    removed[s.id] = { line: s, at: i, next: d.list[i] ? d.list[i].id : null, rules: gone };
+    drawStatus(); mark('status');
+  });
+  $('statAdd').addEventListener('click', function () {
+    sec.status.draft.list.push({ id: newId(), name: '' });
+    drawStatus(); mark('status');
+    $('statList').lastElementChild.querySelector('.s-name').focus();
+  });
+  $('matchList').addEventListener('input', function (e) {
+    var k = e.target.dataset.k, row = e.target.closest('.line'); if (!k || !row) return;
+    sec.status.draft.rules[+row.dataset.i][k] = e.target.value; checkDups(); mark('status');
+  });
+  $('matchList').addEventListener('chips', function (e) { sec.status.draft.rules[+e.target.closest('.line').dataset.i].words = chipWords(e.target); checkDups(); mark('status'); });
+  $('matchList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-do="del"]'); if (!b) return;
+    sec.status.draft.rules.splice(+b.closest('.line').dataset.i, 1); drawMatch(); mark('status');
+  });
+  $('matchAdd').addEventListener('click', function () {
+    var first = sec.status.draft.list[0];
+    sec.status.draft.rules.push({ id: newId(), box: HP, mode: MODES[0], words: [], status: first ? first.id : 'manual' });
+    drawMatch(); mark('status');
+    $('matchList').lastElementChild.querySelector('.chip-in').focus();
+  });
+  $('statusRestore').addEventListener('click', function () { sec.status.draft = clone({ list: STATUS_START, rules: MATCH_START }); removed = {}; drawStatus(); mark('status'); });
+  function putBack(list, r) {
+    var at = -1;
+    if (r.next) list.forEach(function (x, k) { if (x.id === r.next) at = k; });
+    if (at < 0) at = Math.min(r.at, list.length);
+    list.splice(at, 0, r.line);
+  }
+  function restore(id) {
+    var r = removed[id], d = sec.status.draft;
+    if (!r) { d.list.push(clone(state.settings.statuses.filter(function (x) { return x.id === id; })[0])); state.settings.matching.forEach(function (x) { if (x.status === id) d.rules.push(clone(x)); }); return; }
+    putBack(d.list, r); r.rules.forEach(function (g) { putBack(d.rules, g); }); delete removed[id];
+  }
+  function applyStatus(done) {
+    var d = sec.status.draft.list;
+    var due = state.settings.statuses.filter(function (a) { return useOf(a.id) !== UNUSED && !d.some(function (x) { return x.id === a.id; }); });
+    (function next() {
+      if (!due.length) { commit('status'); done(); return; }
+      var a = due.shift(), name = (removed[a.id] && removed[a.id].line.name.trim()) || a.name;
+      askRemove(name, useOf(a.id), a.id === 'hepb', function () { restore(a.id); drawStatus(); refresh(); }, next);
+    })();
+  }
+  $('statusApply').addEventListener('click', function () { applyStatus(function () { toast('Applied'); }); });
+  function blank(t, r) {
+    if (t === 'points') return '<input type="number" data-k="points" step="1" min="-9999" max="9999" aria-label="Points" value="' + esc(r.points) + '">';
+    if (t === 'session') return '<select data-k="session" aria-label="Session">' + opts(sessionsList(), r.session) + '</select>';
+    if (t === 'priority') return '<select data-k="priority" aria-label="Priority">' + opts(PRIORITIES, r.priority) + '</select>';
+    if (t === 'box') return '<select class="t-box" data-k="box" aria-label="Box" title="' + esc(boxName(r.box)) + '">' + boxOpts(r.box) + '</select>';
+    if (t === 'mode') return '<select data-k="mode" aria-label="Match">' + opts(MODES, r.mode) + '</select>';
+    if (t === 'words') return chipsHtml(r.words);
+  }
+  function sentHtml(tokens, r) {
+    var html = function (ts) { return ts.map(function (t) { return BLANKS[t] ? blank(t, r) : '<span class="w">' + esc(t) + '</span>'; }).join(''); }, k = tokens.indexOf('words') + 1;
+    return '<div class="sent">' + (k ? '<div class="if">' + html(tokens.slice(0, k)) + '</div><div class="then">' + html(tokens.slice(k)) + '</div>' : html(tokens)) + '</div>';
+  }
+  function ruleHtml(r, i) { return '<div class="line" data-i="' + i + '">' + GRIP + sentHtml(SHAPES[r.shape], r) + copyBtn('rule') + DEL_RULE + '</div>'; }
+  function drawRules() { $('ruleList').innerHTML = sec.rules.draft.map(ruleHtml).join(''); }
+  $('ruleList').addEventListener('input', function (e) {
+    var k = e.target.dataset.k, row = e.target.closest('.line'); if (!k || !row) return;
+    sec.rules.draft[+row.dataset.i][k] = e.target.value; mark('rules');
+  });
+  $('ruleList').addEventListener('change', function (e) {
+    var el = e.target, row = el.closest('.line'); if (!row || el.dataset.k !== 'points' || el.value === '') return;
+    var v = Math.max(-9999, Math.min(9999, Math.round(+el.value))); el.value = v; sec.rules.draft[+row.dataset.i].points = String(v);
+  });
+  $('ruleList').addEventListener('chips', function (e) { sec.rules.draft[+e.target.closest('.line').dataset.i].words = chipWords(e.target); mark('rules'); });
+  $('ruleList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-do="del"]'); if (!b) return;
+    sec.rules.draft.splice(+b.closest('.line').dataset.i, 1); drawRules(); mark('rules');
+  });
+  function shapeText(t) { return t.map(function (x, n) { return (n ? ' ' : '') + (BLANKS[x] ? '<span class="blank">[' + BLANKS[x] + ']</span>' : esc(x)); }).join(''); }
+  $('shapeList').innerHTML = SHAPES.slice(1).map(function (t, n) { return '<button type="button" class="shape" data-shape="' + (n + 1) + '">' + shapeText(t) + '</button>'; }).join('');
+  $('ruleAdd').addEventListener('click', function () { openBox('pickScrim'); });
+  $('pickCancel').addEventListener('click', function () { closeBox('pickScrim'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('pickScrim').hidden) closeBox('pickScrim'); });
+  $('shapeList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-shape]'); if (!b) return;
+    var n = +b.dataset.shape;
+    closeBox('pickScrim');
+    sec.rules.draft.push(rule(n, '', EARLIEST));
+    drawRules(); mark('rules');
+    $('ruleList').lastElementChild.querySelector(n >= 4 ? '.chip-in' : '[data-k="points"]').focus();
+  });
+  $('rulesRestore').addEventListener('click', function () { sec.rules.draft = clone(RULE_START); drawRules(); mark('rules'); });
+  $('rulesApply').addEventListener('click', function () { commit('rules'); toast('Applied'); });
+  var ROWS = {
+    statList: { sec: 'status', items: function () { return sec.status.draft.list; }, draw: drawStatus },
+    matchList: { sec: 'status', items: function () { return sec.status.draft.rules; }, draw: drawMatch },
+    ruleList: { sec: 'rules', items: function () { return sec.rules.draft; }, draw: drawRules }
+  };
+  Object.keys(ROWS).forEach(function (id) {
+    $(id).addEventListener('click', function (e) {
+      var b = e.target.closest('[data-do="copy"]'); if (!b) return;
+      var L = ROWS[id], list = L.items(), i = +b.closest('[data-i]').dataset.i, c = clone(list[i]);
+      if (c.id) c.id = newId();
+      list.splice(i + 1, 0, c); L.draw(); mark(L.sec);
+      $(id).children[i + 1].querySelector('.s-name, .sent select, .sent input').focus();
+    });
+  });
+  var rowDrag = null;
+  document.addEventListener('pointerdown', function (e) {
+    var g = e.button === 0 && e.target.closest && e.target.closest('.grip'); if (!g) return;
+    e.preventDefault();
+    rowDrag = { row: g.parentNode, list: g.parentNode.parentNode, from: +g.parentNode.dataset.i, y0: e.clientY, pid: e.pointerId, to: -1, line: null };
+  });
+  document.addEventListener('pointermove', function (e) {
+    var d = rowDrag; if (!d || e.pointerId !== d.pid) return;
+    if (!d.line) { d.line = document.createElement('div'); d.line.className = 'drop-line'; d.list.appendChild(d.line); d.row.classList.add('row-drag'); document.body.classList.add('dragging'); }
+    d.row.style.transform = 'translateY(' + (e.clientY - d.y0) + 'px)';
+    var rest = Array.prototype.filter.call(d.list.children, function (x) { return x !== d.row && x.dataset.i != null; }), last = rest[rest.length - 1];
+    d.to = rest.filter(function (x) { var b = x.getBoundingClientRect(); return b.top + b.height / 2 < e.clientY; }).length;
+    d.line.style.top = (d.to < rest.length ? rest[d.to].offsetTop - 6 : last ? last.offsetTop + last.offsetHeight + 3 : 0) + 'px';
+  });
+  function endRowDrag(cancelled) {
+    var d = rowDrag; rowDrag = null;
+    if (!d.line) return;
+    d.line.remove(); d.row.classList.remove('row-drag'); d.row.style.transform = ''; document.body.classList.remove('dragging');
+    if (cancelled || d.to === d.from) return;
+    var L = ROWS[d.list.id], list = L.items();
+    list.splice(d.to, 0, list.splice(d.from, 1)[0]); L.draw(); mark(L.sec);
+  }
+  document.addEventListener('pointerup', function (e) { if (rowDrag && e.pointerId === rowDrag.pid) endRowDrag(false); });
+  document.addEventListener('pointercancel', function (e) { if (rowDrag && e.pointerId === rowDrag.pid) endRowDrag(true); });
+  var leaving = [];
+  $('leaveX').innerHTML = ICON_X;
+  $('backBtn').addEventListener('click', function () {
+    leaving = SECS.filter(function (k) { return sec[k].dirty; });
+    if (!leaving.length) { showBoard(); return; }
+    $('leaveTitle').textContent = leaving.map(function (k) { return NAMES[k]; }).join(' and ') + ' changed, not applied';
+    $('leaveApply').disabled = leaving.some(function (k) { return !canApply(k); });
+    openBox('leaveScrim');
+  });
+  $('leaveX').addEventListener('click', function () { closeBox('leaveScrim'); });
+  $('leaveDiscard').addEventListener('click', function () { closeBox('leaveScrim'); leaving.forEach(discard); showBoard(); });
+  $('leaveApply').addEventListener('click', function () {
+    closeBox('leaveScrim');
+    if (sec.centres.dirty) commit('centres');
+    if (sec.rules.dirty) commit('rules');
+    if (sec.status.dirty) applyStatus(showBoard); else showBoard();
+  });
+
+  function closeMenu() { menuEl.hidden = true; menuEl.innerHTML = ''; }
+  function openMenu(x, y, items) {
+    menuEl.innerHTML = '';
+    items.forEach(function (it) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'menuitem'); b.textContent = it[0]; b.addEventListener('click', function () { closeMenu(); it[1](); }); menuEl.appendChild(b); });
+    menuEl.hidden = false;
+    var r = menuEl.getBoundingClientRect(), vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+    menuEl.style.left = Math.max(8, Math.min(x, vw - r.width - 8)) + 'px'; menuEl.style.top = Math.max(8, Math.min(y, vh - r.height - 8)) + 'px';
+    var first = menuEl.querySelector('button'); if (first) first.focus();
+  }
+  document.addEventListener('contextmenu', function (e) {
+    if ($('boardView').hidden || !$('boardView').contains(e.target)) return;
+    var x = e.clientX, y = e.clientY;
+    var col = e.target.closest('.colhead[data-col]');
+    if (col) { if (state.sessions <= 1) return; var csi = +col.getAttribute('data-col'); e.preventDefault(); openMenu(x, y, [['Remove session', function () { askRemoveSession(csi); }]]); return; }
+    var pt = e.target.closest('.tile[data-tile]'), mt = e.target.closest('.mtile[data-manual]'), bt = e.target.closest('.mtile[data-bin]');
+    if (pt && !pt.closest('.cell')) { var pid = pt.getAttribute('data-tile'); e.preventDefault(); openMenu(x, y, [['Details', function () { openDetails(pid); }], ['Delete order', function () { askDeleteOrder(pid); }]]); return; }
+    if (mt) { var mid = mt.getAttribute('data-manual'); e.preventDefault(); openMenu(x, y, [['Check', function () { openCheck(mid); }], ['Delete order', function () { askDeleteOrder(mid); }]]); return; }
+    if (bt) { var bid = bt.getAttribute('data-bin'); e.preventDefault(); openMenu(x, y, [['Restore', function () { restoreOrder(bid); }], ['Delete for good', function () { askPurge(bid); }]]); return; }
+    var head = e.target.closest('.rowhead'), cell = e.target.closest('.cell');
+    if (!head && !cell) return;
+    e.preventDefault();
+    if (head) {
+      var hm = +head.getAttribute('data-m'), m = machines[hm];
+      openMenu(x, y, [
+        ['Edit', function () { openMachine(hm); }],
+        ['Rename', function () { state.renaming = hm; render(); }],
+        m.out ? ['Unblock machine', function () { setOut(hm, false); }] : ['Block machine', function () { askOut(hm); }],
+        ['Remove machine', function () { askRemoveMachine(hm); }]
+      ]);
+      return;
+    }
+    var ci = +cell.getAttribute('data-m'), si = +cell.getAttribute('data-s'), c = machines[ci].cells[si];
+    if (c.blocked) openMenu(x, y, [['Unblock', function () { unblockSlot(ci, si); }]]);
+    else if (c.tile) { var id = c.tile; openMenu(x, y, [['Back to Unallocated', function () { backToNotDone(id); }], ['Block slot', function () { blockSlot(ci, si); }], ['Details', function () { openDetails(id); }], ['Delete order', function () { askDeleteOrder(id); }]]); }
+    else openMenu(x, y, [['Block slot', function () { blockSlot(ci, si); }], ['Block machine', function () { askOut(ci); }]]);
+  });
+  document.addEventListener('pointerdown', function (e) { if (!menuEl.hidden && !e.target.closest('#menu')) closeMenu(); }, true);
+  var press = null, swallow = false;
+  function endPress(e) { if (press && e.pointerId === press.pid) { clearTimeout(press.timer); press = null; } }
+  document.addEventListener('pointerdown', function (e) {
+    swallow = false; if (press) endPress({ pointerId: press.pid });
+    var t = e.target; if (e.pointerType !== 'touch' || !t.closest || !t.closest('.colhead, .rowhead, .cell, .tile, .mtile') || !$('boardView').contains(t)) return;
+    var x = e.clientX, y = e.clientY;
+    press = { pid: e.pointerId, x0: x, y0: y, timer: setTimeout(function () { press = null; drag = null; swallow = true; t.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: x, clientY: y })); }, 500) };
+  }, true);
+  document.addEventListener('pointermove', function (e) { if (press && e.pointerId === press.pid && Math.abs(e.clientX - press.x0) + Math.abs(e.clientY - press.y0) >= 8) endPress(e); });
+  document.addEventListener('pointerup', endPress);
+  document.addEventListener('pointercancel', endPress);
+  document.addEventListener('click', function (e) { if (swallow) { swallow = false; e.preventDefault(); e.stopPropagation(); } }, true);
+  function commitRename() {
+    if (state.renaming < 0) return;
+    var inp = $('renameInput'); var v = inp ? inp.value.trim() : ''; var m = machines[state.renaming];
+    if (v && v.slice(0, 24) !== m.name) { changed('rename', { machine: m.name, name: v.slice(0, 24) }); m.name = v.slice(0, 24); }
+    state.renaming = -1; render();
+  }
+  grid.addEventListener('keydown', function (e) { if (e.target.id !== 'renameInput') return; if (e.key === 'Enter') { e.preventDefault(); commitRename(); } else if (e.key === 'Escape') { state.renaming = -1; render(); } });
+  grid.addEventListener('focusout', function (e) { if (e.target.id === 'renameInput') commitRename(); });
+  document.addEventListener('keydown', function (e) { if (e.key !== 'Escape') return; if (!menuEl.hidden) { closeMenu(); return; } if (anyDialogOpen()) closeDialogs(); });
+  document.addEventListener('mousedown', function (e) { if (e.button === 1 && e.target.closest('.cell .tile')) e.preventDefault(); });
+  document.addEventListener('auxclick', function (e) { if (e.button !== 1) return; var tileEl = e.target.closest('.cell .tile'); if (!tileEl) return; e.preventDefault(); backToNotDone(tileEl.getAttribute('data-tile')); });
+  var suppressClick = false;
+  document.addEventListener('click', function (e) {
+    if (suppressClick) return;
+    var tileEl = e.target.closest('.tile');
+    if (tileEl && !tileEl.closest('.ghost')) { openDetails(tileEl.getAttribute('data-tile')); return; }
+    var mt = e.target.closest('.mtile[data-manual]'); if (mt) { openCheck(mt.getAttribute('data-manual')); return; }
+    var mn = e.target.closest('.mname[data-machine]'); if (mn) openMachine(+mn.getAttribute('data-machine'));
+  });
+
+  var drag = null;
+  document.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0) return;
+    var el = e.target.closest('.tile');
+    if (!el || el.closest('.ghost') || el.closest('.scrim')) return;
+    drag = { id: el.getAttribute('data-tile'), fromTable: !!el.closest('.cell'), x0: e.clientX, y0: e.clientY, pid: e.pointerId, started: false, src: el, ghost: null, over: null };
+  });
+  function startDrag() {
+    drag.started = true; closeMenu();
+    var t = tiles[drag.id];
+    var g = document.createElement('div'); g.className = 'ghost'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = tileHtml(t); document.body.appendChild(g);
+    drag.ghost = g; drag.src.classList.add('lifted'); document.body.classList.add('dragging');
+    Array.prototype.forEach.call(grid.querySelectorAll('.cell.empty'), function (c) {
+      var f = fit(t, machines[+c.getAttribute('data-m')]);
+      c.classList.add('hl-' + f.state); if (f.label) c.textContent = f.label;
+    });
+    if (drag.fromTable) notDonePool.classList.add('drop-target');
+  }
+  function hoverAt(x, y) {
+    var el = document.elementFromPoint(x, y), cell = el ? el.closest('.cell.empty') : null;
+    if (drag.over && drag.over !== cell) drag.over.classList.remove('hover');
+    if (cell) cell.classList.add('hover');
+    drag.over = cell;
+    notDonePool.classList.toggle('hover', !!(drag.fromTable && el && el.closest('#notDonePool')));
+  }
+  document.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    if (!drag.started) { if (Math.abs(e.clientX - drag.x0) + Math.abs(e.clientY - drag.y0) < 8) return; startDrag(); }
+    drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px'; hoverAt(e.clientX, e.clientY);
+  });
+  function endDrag(e, cancelled) {
+    var d = drag; drag = null;
+    if (!d || !d.started) return;
+    if (d.ghost) d.ghost.remove();
+    document.body.classList.remove('dragging'); d.src.classList.remove('lifted');
+    var el = cancelled ? null : document.elementFromPoint(e.clientX, e.clientY);
+    var cell = el ? el.closest('.cell.empty') : null;
+    var inPool = !!(d.fromTable && el && el.closest('#notDonePool'));
+    Array.prototype.forEach.call(grid.querySelectorAll('.cell.empty'), function (c) { c.classList.remove('hl-ok', 'hl-warn', 'hl-hepb', 'hover'); c.textContent = ''; });
+    notDonePool.classList.remove('drop-target', 'hover');
+    suppressClick = true; setTimeout(function () { suppressClick = false; }, 0);
+    if (cell) {
+      var to = { m: +cell.getAttribute('data-m'), s: +cell.getAttribute('data-s') };
+      if (fit(tiles[d.id], machines[to.m]).state === 'hepb') openRedAlert(d.id, to); else { place(d.id, to, false, false); render(); }
+    } else if (inPool) backToNotDone(d.id);
+  }
+  document.addEventListener('pointerup', function (e) { if (drag && e.pointerId === drag.pid) endDrag(e, false); });
+  document.addEventListener('pointercancel', function (e) { if (drag && e.pointerId === drag.pid) endDrag(e, true); });
+
+  $('addSession').addEventListener('click', function () { state.sessions += 1; machines.forEach(function (m) { m.cells.push({ tile: null, blocked: m.out, reason: '' }); }); changed('add_session', { sessions: state.sessions }); render(); });
+  function askRemoveSession(si) {
+    if (state.sessions <= 1) return;
+    var names = machines.map(function (m) { return m.cells[si].tile; }).filter(Boolean).map(function (id) { return tiles[id].name; });
+    var go = function () { machines.forEach(function (m) { var c = m.cells.splice(si, 1)[0]; if (c && c.tile) { toNotDone(c.tile); tiles[c.tile].history.push({ time: now(), field: 'placement', to: null, reason: 'session removed' }); } }); state.sessions -= 1; changed('remove_session', { session: si + 1, sessions: state.sessions, back: names }); render(); };
+    if (names.length) ask('Remove S' + (si + 1) + '?', sendsBack('Removing', 'S' + (si + 1), names.length), 'Remove session', names, go); else go();
+  }
+  function askRemoveMachine(mi) {
+    var m = machines[mi], ids = m.cells.map(function (c) { return c.tile; }).filter(Boolean);
+    var go = function () { m.cells.forEach(function (c) { if (c.tile) { toNotDone(c.tile); tiles[c.tile].history.push({ time: now(), field: 'placement', to: null, reason: 'machine removed' }); } }); machines.splice(mi, 1); changed('remove_machine', { machine: m.name, back: ids.map(function (id) { return tiles[id].name; }) }); render(); };
+    if (ids.length) ask('Remove ' + m.name + '?', sendsBack('Removing', m.name, ids.length), 'Remove machine', ids.map(function (id) { return tiles[id].name; }), go); else go();
+  }
+  $('addMachine').addEventListener('click', function () {
+    var cells = []; for (var i = 0; i < state.sessions; i++) cells.push({ tile: null, blocked: false, reason: '' });
+    var maxN = machines.reduce(function (mx, m) { var n = parseInt(String(m.name).replace(/\D/g, ''), 10); return isNaN(n) ? mx : Math.max(mx, n); }, 0);
+    machines.push({ name: 'M' + (maxN + 1), takes: [], out: false, cells: cells }); changed('add_machine', { machine: 'M' + (maxN + 1) }); render(); openMachine(machines.length - 1);
+  });
+  $('autoSlot').addEventListener('click', function () { var n = autoSlot(); render(); toast(autoNote(n)); });
+  $('resetBtn').addEventListener('click', reset);
+  $('refreshBtn').addEventListener('click', function () {
+    if (!store.dir || store.off) { toast('No folder'); return; }
+    importOrders().then(function (r) { render(); toast(importNote(r) || 'Nothing to import'); });
+  });
+  $('printBtn').addEventListener('click', function () {
+    var copy = buildCopy('Print');
+    writeCopy(copy).then(function (name) { changed('print', { copy: name || '(not saved)' }); toast(name ? 'Saved ' + name : 'Not saved'); },
+      function (e) { changed('print', { copy: '(not saved: ' + (e.message || e) + ')' }); toast('Copy not saved: ' + (e.message || e)); })
+      .then(function () { setTimeout(function () { window.print(); }, 300); });
+  });
+  function doNewDay() {
+    var copy = buildCopy('New day');
+    writeCopy(copy).then(function (name) {
+      var n = newDay(name); render();
+      return importOrders().then(function (r) { var note = importNote(r); render(); toast(fmt(TODAY, 'day') + ': ' + n + ' done' + (note ? ', ' + note : '')); });
+    }, function (e) { toast('Not saved: ' + (e.message || e)); });
+  }
+  $('newDay').addEventListener('click', function () {
+    var names = []; machines.forEach(function (m) { m.cells.forEach(function (c) { if (c.tile) names.push(tiles[c.tile].name); }); });
+    var binned = state.bin.length;
+    ask('New day?', names.length ? 'These patients are marked done and their dialysis orders are removed:' : '', 'New day', names, doNewDay, null, (names.length ? 'Unallocated orders carry over.' : 'Nothing on the board. Unallocated orders carry over.') + (binned ? '\nRecycle bin emptied: ' + binned + (binned === 1 ? ' order.' : ' orders.') : ''));
+  });
+
+  var remembered = null;
+  $('sStamp').textContent = $('genStamp').textContent = BUILD.version === 'dev' ? 'Development copy' : 'Version ' + BUILD.version + ' (' + fmt(BUILD.date) + ' ' + BUILD.date.slice(0, 4) + ')';
+  function showErr(e) { $('sErr').textContent = e ? 'Could not open: ' + (e.message || e) : ''; }
+  function openStart() {
+    var supported = 'showDirectoryPicker' in window, failed = !!(store.dir && store.status === 'error');
+    $('sMsg').textContent = !supported ? 'Open this file in Chrome or Edge to keep your work.' : !store.dir ? '' : failed ? 'Not saved to ' + store.dir.name + ': ' + store.error : 'Saving to ' + store.dir.name;
+    $('sChoose').hidden = !supported; $('sChoose').textContent = store.dir ? 'Change data folder' : 'Choose data folder';
+    $('sRetry').hidden = !failed;
+    $('sOff').hidden = !!store.dir || store.off;
+    $('sClose').hidden = !startMayClose();
+    $('sContinue').hidden = !(remembered && !store.dir);
+    showErr(null);
+    openDialog('startScrim');
+  }
+  function closeStart() { $('startScrim').hidden = true; behind(anyDialogOpen()); }
+  function connectUI(dir) {
+    var same = store.dir && !store.off && dir.isSameEntry ? dir.isSameEntry(store.dir) : Promise.resolve(false);
+    return same.then(function (isSame) {
+      if (isSame) return flush().then(function () { if (store.status === 'error') throw new Error(store.error); closeStart(); render(); toast('Saved to ' + dir.name); return false; });
+      return readText(dir, 'state.json').then(function (text) {
+        if (text === null) return true;
+        JSON.parse(text);
+        if (!Object.keys(tiles).length) return true;
+        var label = store.dir && !store.off ? 'The board here stays in ' + store.dir.name : 'The unsaved board here is lost';
+        return new Promise(function (res) { ask('Load ' + dir.name + '?', label, 'Load', [], function () { res(true); }, function () { res(false); }); });
+      });
+    }).then(function (go) {
+      if (!go) return;
+      return connect(dir).then(function () { closeStart(); render(); toast('Saving to ' + dir.name); });
+    }).catch(function (e) { openStart(); showErr(e); });
+  }
+  $('sRetry').addEventListener('click', function () {
+    flush().then(function () { if (store.status === 'error') { showErr(store.error); return; } closeStart(); render(); toast('Saved'); });
+  });
+  $('sChoose').addEventListener('click', function () {
+    window.showDirectoryPicker({ id: 'dialysis-allocator', mode: 'readwrite' }).then(connectUI, function (e) { if (!e || e.name !== 'AbortError') showErr(e); });
+  });
+  $('sContinue').addEventListener('click', function () {
+    if (!remembered) return;
+    remembered.requestPermission({ mode: 'readwrite' }).then(function (p) { if (p === 'granted') return connectUI(remembered); showErr('Permission not given'); }, showErr);
+  });
+  $('sOff').addEventListener('click', function () { store.off = true; closeStart(); renderStatus(); });
+  $('saveState').addEventListener('click', openStart);
+  function init() {
+    if (!('showDirectoryPicker' in window)) { openStart(); return Promise.resolve(); }
+    return handles.get('orders').then(function (o) { store.orders = o || null; return handles.get('dir'); }).then(function (h) {
+      if (!h) { openStart(); return; }
+      remembered = h; $('sContinue').textContent = 'Continue with ' + h.name;
+      return h.queryPermission({ mode: 'readwrite' }).then(function (p) { if (p === 'granted') return connectUI(h); openStart(); }, function () { openStart(); });
+    }).catch(function () { openStart(); });
+  }
+  window.addEventListener('beforeunload', function (e) { if (pending()) { e.preventDefault(); e.returnValue = ''; } });
+
+  var DARK = matchMedia('(prefers-color-scheme: dark)');
+  function showTheme() { $('themeSw').checked = (document.documentElement.dataset.theme || (DARK.matches ? 'dark' : 'light')) === 'dark'; }
+  $('themeSw').addEventListener('change', function () {
+    var t = this.checked ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem('dialysis-allocator-theme', t); } catch (e) {  }
+  });
+  DARK.addEventListener('change', showTheme);
+  showTheme();
+
+  freshState(); render();
+  window.allocator = {
+    state: state, tiles: tiles, machines: machines, store: store,
+    autoSlot: autoSlot, autoNote: autoNote, newDay: newDay, buildCopy: buildCopy, writeCopy: writeCopy, addOrder: addOrder, binOrder: binOrder, restoreOrder: restoreOrder, purgeOrder: purgeOrder,
+    applySettings: applySettings, settings: function () { return state.settings; }, REASONS: REASONS, codesOf: codesOf, shortCodes: shortCodes, boxText: boxText, ruleHit: ruleHit, centreOf: centreOf, showSettings: showSettings, showBoard: showBoard,
+    starts: { centres: CENTRE_WORDS, statuses: STATUS_START, matching: MATCH_START, allocation: RULE_START },
+    parseOrder: parseOrder, formSections: formSections, pdfText: pdfText, orderTexts: orderTexts, txtPages: txtPages, importOrders: importOrders, fit: fit, score: score, cells: cellsOf, render: render, today: function () { return TODAY; }, localDate: localDate,
+    connect: connect, flush: flush, snapshot: snapshot, loadState: loadState, freshState: freshState, place: place, backToNotDone: backToNotDone, reset: reset, setOut: setOut, blockSlot: blockSlot, unblockSlot: unblockSlot, addDays: addDays,
+    openCheck: openCheck, openDetails: openDetails, openStart: openStart, connectUI: connectUI, init: init, handles: handles
+  };
+  if (!window.__allocatorNoInit) init();
+})();
+</script>
+</body>
+</html>
